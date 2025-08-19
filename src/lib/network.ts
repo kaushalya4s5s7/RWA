@@ -1,0 +1,1 @@
+export const backendDomain = "https://onlyassets-server.onrender.com";
