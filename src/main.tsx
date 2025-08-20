@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Configure network for OneChain
 const { networkConfig } = createNetworkConfig({
-  testnet: { url: 'https://rpc-testnet.onelabs.cc:443' }, // You may need to update this to OneChain RPC
+  testnet: { url: import.meta.env.VITE_ONELABS_RPC }, // You may need to update this to OneChain RPC
   localnet: { url: getFullnodeUrl('localnet') },
 });
 const queryClient = new QueryClient();

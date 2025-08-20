@@ -1,1 +1,1 @@
-export const backendDomain = "https://onlyassets-server.onrender.com";
+export const backendDomain = import.meta.env.VITE_BACKEND_URL;

@@ -16,7 +16,7 @@ export const fetchHBARPrice = async (): Promise<number> => {
   try {
     // Try CoinGecko API first
     const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd'
+  import.meta.env.VITE_COINGECKO_API
     );
     
     if (response.ok) {
@@ -37,7 +37,7 @@ export const fetchHBARPrice = async (): Promise<number> => {
 
   try {
     // Fallback to CoinCap API
-    const response = await fetch('https://api.coincap.io/v2/assets/hedera-hashgraph');
+  const response = await fetch(import.meta.env.VITE_COINCAP_API);
     
     if (response.ok) {
       const data = await response.json();

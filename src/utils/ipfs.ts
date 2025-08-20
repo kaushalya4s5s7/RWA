@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const IPFS_GATEWAYS = [
-  "https://gateway.pinata.cloud/ipfs/",
+  import.meta.env.VITE_PINATA_GATEWAY,
   "https://ipfs.io/ipfs/",
   "https://cloudflare-ipfs.com/ipfs/",
   "https://gateway.ipfs.io/ipfs/"
@@ -181,5 +181,5 @@ export const uploadImageToIPFS = async (file: File): Promise<string> => {
 };
 
 export const getIpfsUrl = (hash: string): string => {
-  return `https://gateway.pinata.cloud/ipfs/${hash}`;
+  return `${import.meta.env.VITE_PINATA_GATEWAY}${hash}`;
 };

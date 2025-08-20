@@ -6,7 +6,7 @@ class ProxyJsonRpcProvider extends ethers.providers.JsonRpcProvider {
 
   constructor(proxyUrl: string, network?: ethers.providers.Networkish) {
     // Use a dummy URL for the parent constructor
-    super('https://onlyassets-server.onrender.com', network);
+  super(import.meta.env.VITE_BACKEND_URL, network);
     this.proxyUrl = proxyUrl;
   }
 

@@ -69,5 +69,5 @@ export const uploadToPinata = async (
 };
 
 export const getIpfsUrl = (hash: string): string => {
-  return `https://gateway.pinata.cloud/ipfs/${hash}`;
+  return `${import.meta.env.VITE_PINATA_GATEWAY}${hash}`;
 };
