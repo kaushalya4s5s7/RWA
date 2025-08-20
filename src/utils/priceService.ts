@@ -21,7 +21,7 @@ export const fetchHBARPrice = async (): Promise<number> => {
     
     if (response.ok) {
       const data = await response.json();
-      const price = data['hedera-hashgraph']?.usd;
+      const price = data['onechain-hashgraph']?.usd;
       
       if (price) {
         cachedPrice = {

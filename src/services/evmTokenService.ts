@@ -10,8 +10,8 @@ export interface TokenCreationData {
 }
 
 /**
- * EVM-compatible token service for creating tokens on Hedera using MetaMask
- * This approach uses Hedera's EVM compatibility layer instead of native SDK
+ * EVM-compatible token service for creating tokens on onechain using MetaMask
+ * This approach uses onechain's EVM compatibility layer instead of native SDK
  */
 export class EVMTokenService {
   private provider: ethers.providers.Web3Provider;
@@ -23,14 +23,14 @@ export class EVMTokenService {
   }
 
   /**
-   * Create ERC-721/ERC-1155 token on Hedera using EVM compatibility
+   * Create ERC-721/ERC-1155 token on onechain using EVM compatibility
    */
   async createToken(tokenData: TokenCreationData): Promise<{ tokenId: string; transactionHash: string }> {
     try {
       // We'll deploy a simple contract and then use existing marketplace contracts
-      // This approach is compatible with Hedera EVM and works with MetaMask
+      // This approach is compatible with onechain EVM and works with MetaMask
       
-      console.log('Creating token with MetaMask on Hedera EVM...');
+      console.log('Creating token with MetaMask on onechain EVM...');
       console.log('Token data:', tokenData);
 
       // For this implementation, we'll use a simple approach:
@@ -42,7 +42,7 @@ export class EVMTokenService {
       console.log('Wallet address:', walletAddress);
 
       // Create a simple transaction to "mint" the token concept
-      // This will be recorded on Hedera and can be referenced later
+      // This will be recorded on onechain and can be referenced later
       const tokenCreationData = {
         name: tokenData.name,
         description: tokenData.description,

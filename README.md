@@ -31,7 +31,7 @@ A comprehensive platform for tokenizing real-world assets including Real Estate,
 
 ## 🌟 Platform Overview
 
-The RWA Tokenization Platform enables users to tokenize real-world assets and trade them on a decentralized marketplace. Built on Hedera Hashgraph, the platform offers:
+The RWA Tokenization Platform enables users to tokenize real-world assets and trade them on a decentralized marketplace. Built on onechain Hashgraph, the platform offers:
 
 - **Asset Tokenization**: Convert physical assets into digital tokens
 - **Automated Marketplace**: Seamless listing and trading of tokenized assets
@@ -50,9 +50,9 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 - **Flexible Supply**: Support for both fungible and non-fungible tokens
 
 ### 🛒 Decentralized Marketplace
-- **String Token IDs**: Hedera-native token ID format (0.0.XXXXXX)
+- **String Token IDs**: onechain-native token ID format (0.0.XXXXXX)
 - **No Token Custody**: Marketplace doesn't hold tokens, only records listings
-- **Native Transfers**: Uses Hedera's native transfer operations
+- **Native Transfers**: Uses onechain's native transfer operations
 - **HBAR Payments**: Direct HBAR payments for purchases
 
 ### 💰 Revenue Distribution
@@ -72,10 +72,10 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 ## 🛠 Technology Stack
 
 ### Blockchain & Smart Contracts
-- **Hedera Hashgraph**: Primary blockchain network
-- **Hedera Token Service (HTS)**: Native token creation and management
+- **onechain Hashgraph**: Primary blockchain network
+- **onechain Token Service (HTS)**: Native token creation and management
 - **Solidity**: Smart contract development
-- **Hedera SDK**: Native blockchain interactions
+- **onechain SDK**: Native blockchain interactions
 
 ### Frontend
 - **React 18**: Modern UI framework
@@ -90,7 +90,7 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 - **Express.js**: API framework
 - **IPFS/Pinata**: Decentralized storage
 - **MetaMask**: Wallet integration
-- **Hashio RPC**: Hedera EVM compatibility
+- **Hashio RPC**: onechain EVM compatibility
 
 ### Development Tools
 - **Vite**: Fast build tool
@@ -143,15 +143,15 @@ function getMarketplaceBalance() external view returns (uint256)
 
 **Features**:
 - ✅ **No Token Custody**: Marketplace doesn't hold user tokens
-- ✅ **String Token IDs**: Native Hedera token ID support
+- ✅ **String Token IDs**: Native onechain token ID support
 - ✅ **HBAR Accumulation**: Builds HBAR reserves for buybacks
 - ✅ **Metadata Integration**: Links to IPFS asset metadata
 - ✅ **Payment Splitter Integration**: Automatic rental distribution
 
 **Workflow**:
-1. **List Asset**: Record asset availability (tokens transferred via Hedera)
+1. **List Asset**: Record asset availability (tokens transferred via onechain)
 2. **Buy Asset**: User pays HBAR → Marketplace keeps payment
-3. **Token Transfer**: External Hedera transfer to buyer
+3. **Token Transfer**: External onechain transfer to buyer
 4. **Sell Asset**: User returns tokens → Gets HBAR from marketplace reserves
 
 ---
@@ -171,7 +171,7 @@ function getTokenHolders(string _tokenId) external view returns (TokenHolder[])
 **Features**:
 - ✅ **Proportional Distribution**: Income split based on ownership percentage
 - ✅ **Manager Controls**: Only authorized managers can submit payments
-- ✅ **String Token Support**: Compatible with Hedera token IDs
+- ✅ **String Token Support**: Compatible with onechain token IDs
 - ✅ **Automatic Calculation**: Smart distribution algorithms
 - ✅ **Payment History**: Complete audit trail
 
@@ -182,14 +182,14 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 
 ---
 
-### 4. Hedera Token Service (HTS)
+### 4. onechain Token Service (HTS)
 
-**Purpose**: Native token creation and management on Hedera
+**Purpose**: Native token creation and management on onechain
 
 **Features**:
 - ✅ **Low Fees**: $0.0001 per token creation
 - ✅ **Fast Finality**: 3-5 second transaction confirmation
-- ✅ **Native Integration**: Built into Hedera consensus
+- ✅ **Native Integration**: Built into onechain consensus
 - ✅ **Enterprise Security**: Bank-grade security model
 - ✅ **Regulatory Compliance**: Built-in compliance features
 
@@ -200,9 +200,9 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 
 ---
 
-## 🚀 Hedera Integration & Benefits
+## 🚀 onechain Integration & Benefits
 
-### Why Hedera Hashgraph?
+### Why onechain Hashgraph?
 
 #### 🌐 **Network Performance**
 - **10,000+ TPS**: Handles enterprise-scale transactions
@@ -220,7 +220,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 - **No Smart Contracts Needed**: Tokens are native to the network
 - **Built-in Features**: Freeze, KYC, compliance controls
 - **Atomic Transactions**: Guaranteed transaction consistency
-- **Hedera Account Model**: Native account system
+- **onechain Account Model**: Native account system
 
 #### 🌍 **Real-World Adoption**
 - **Enterprise Partners**: Google, IBM, Boeing, Deutsche Telekom
@@ -228,9 +228,9 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 - **Regulatory Clarity**: Working with regulators globally
 - **Developer Ecosystem**: Growing developer community
 
-### Hedera vs Other Blockchains
+### onechain vs Other Blockchains
 
-| Feature | Hedera | Ethereum | Polygon |
+| Feature | onechain | Ethereum | Polygon |
 |---------|--------|----------|---------|
 | TPS | 10,000+ | 15 | 7,000 |
 | Finality | 3-5 sec | 1-6 min | 2-5 sec |
@@ -253,7 +253,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 1. **Asset Creation**: Fill comprehensive asset details form
 2. **Image Upload**: Upload asset images to IPFS
 3. **Metadata Generation**: Create comprehensive metadata
-4. **Token Minting**: Create Hedera tokens with metadata
+4. **Token Minting**: Create onechain tokens with metadata
 5. **Auto-Listing**: Automatic marketplace listing with random ID
 6. **Portfolio Management**: Track created and managed assets
 
@@ -283,7 +283,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 - npm or yarn
 - Git
 - MetaMask wallet
-- Hedera testnet account
+- onechain testnet account
 ```
 
 ### Clone Repository
@@ -320,17 +320,17 @@ npm start
 ### Deploy Admin Contract
 ```bash
 # Using Hardhat or Remix
-npx hardhat deploy --network hedera-testnet --contract AdminContract
+npx hardhat deploy --network onechain-testnet --contract AdminContract
 ```
 
 ### Deploy Marketplace Contract
 ```bash
-npx hardhat deploy --network hedera-testnet --contract Marketplace
+npx hardhat deploy --network onechain-testnet --contract Marketplace
 ```
 
 ### Deploy PaymentSplitter Contract
 ```bash
-npx hardhat deploy --network hedera-testnet --contract PaymentSplitter
+npx hardhat deploy --network onechain-testnet --contract PaymentSplitter
 ```
 
 ### Contract Addresses (Testnet)
@@ -346,10 +346,10 @@ PaymentSplitter Contract: 0x9cA1cC1eF3E18C741b5117eA51481E9bb66aeee1
 
 ### Frontend Environment (.env)
 ```bash
-# Hedera Configuration
-VITE_HEDERA_NETWORK=testnet
-VITE_HEDERA_ACCOUNT_ID=0.0.6498605
-VITE_HEDERA_PRIVATE_KEY=0x7ea592ad2bf4db5e006b39dfc60f3ab9f17f6b548fba1fc5d89d4a38f8211acd
+# onechain Configuration
+VITE_onechain_NETWORK=testnet
+VITE_onechain_ACCOUNT_ID=0.0.6498605
+VITE_onechain_PRIVATE_KEY=0x7ea592ad2bf4db5e006b39dfc60f3ab9f17f6b548fba1fc5d89d4a38f8211acd
 
 # Contract Addresses
 VITE_ADMIN_CONTRACT_ADDRESS=0xC57D9378F54A2cA9ED87822E9922c79F684B2a2c
@@ -357,8 +357,8 @@ VITE_MARKETPLACE_CONTRACT_ADDRESS=0x1A88e748E74fc90D437b23595D7E176b25289673
 VITE_PAYMENT_SPLITTER_CONTRACT_ADDRESS=0x9cA1cC1eF3E18C741b5117eA51481E9bb66aeee1
 
 # RPC URLs
-VITE_HEDERA_TESTNET_RPC=https://testnet.hashio.io/api
-VITE_HEDERA_MAINNET_RPC=https://mainnet.hashio.io/api
+VITE_onechain_TESTNET_RPC=https://testnet.hashio.io/api
+VITE_onechain_MAINNET_RPC=https://mainnet.hashio.io/api
 
 # IPFS Configuration
 VITE_PINATA_API_KEY=your_pinata_api_key
@@ -437,7 +437,7 @@ src/
 │   └── login/               # Authentication
 ├── services/
 │   ├── contractService.ts   # Smart contract interactions
-│   ├── hederaSDKService.ts  # Hedera SDK operations
+│   ├── onechainSDKService.ts  # onechain SDK operations
 │   ├── marketplaceService.ts # Marketplace operations
 │   └── authService.ts       # Authentication service
 ├── utils/
@@ -612,8 +612,8 @@ vercel --prod
 
 ### Contract Deployment (Mainnet)
 ```bash
-# Deploy to Hedera mainnet
-npx hardhat deploy --network hedera-mainnet
+# Deploy to onechain mainnet
+npx hardhat deploy --network onechain-mainnet
 ```
 
 ### Production Configuration
@@ -631,7 +631,7 @@ npx hardhat deploy --network hedera-mainnet
 - **Transaction Volume**: Track total transaction value
 - **Active Users**: Monitor user engagement
 - **Asset Performance**: Analyze asset yields
-- **Network Usage**: Hedera network utilization
+- **Network Usage**: onechain network utilization
 
 ### Error Tracking
 - **Frontend Errors**: User interface issues
@@ -666,7 +666,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- **Hedera Hashgraph**: For providing enterprise-grade blockchain infrastructure
+- **onechain Hashgraph**: For providing enterprise-grade blockchain infrastructure
 - **OpenZeppelin**: For secure smart contract libraries
 - **React Community**: For excellent frontend framework
 - **IPFS**: For decentralized storage solutions
@@ -682,7 +682,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Built with ❤️ on Hedera Hashgraph**
+**Built with ❤️ on onechain Hashgraph**
 
 *Tokenizing the world's assets, one token at a time.*
 <img width="1873" height="708" alt="image" src="https://github.com/user-attachments/assets/4cbb45ce-f077-4d98-8597-390c219b09a1" />

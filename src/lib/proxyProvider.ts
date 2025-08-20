@@ -56,20 +56,20 @@ class ProxyJsonRpcProvider extends ethers.providers.JsonRpcProvider {
   }
 }
 
-// Create provider instance for Hedera testnet via proxy
+// Create provider instance for onechain testnet via proxy
 export const createProxyProvider = (networkName: 'testnet' | 'mainnet' = 'testnet') => {
   const proxyUrl = `/api/hashio-proxy`;
   
-  // Hedera network configuration
+  // onechain network configuration
   const network = {
-    name: `hedera-${networkName}`,
+    name: `onechain-${networkName}`,
     chainId: networkName === 'testnet' ? 296 : 295,
     ensAddress: undefined,
   };
 
   const provider = new ProxyJsonRpcProvider(proxyUrl, network);
   
-  console.log(`🌐 Created proxy provider for Hedera ${networkName}:`, {
+  console.log(`🌐 Created proxy provider for onechain ${networkName}:`, {
     proxyUrl,
     chainId: network.chainId,
     name: network.name
@@ -79,7 +79,7 @@ export const createProxyProvider = (networkName: 'testnet' | 'mainnet' = 'testne
 };
 
 // Export the provider instance
-export const hederaProxyProvider = createProxyProvider();
+export const onechainProxyProvider = createProxyProvider();
 
 // Helper function to create contract instance with proxy provider
 export const createContractWithProxy = (
@@ -87,7 +87,7 @@ export const createContractWithProxy = (
   abi: any[], 
   signerOrProvider?: ethers.Signer | ethers.providers.Provider
 ) => {
-  const provider = signerOrProvider || hederaProxyProvider;
+  const provider = signerOrProvider || onechainProxyProvider;
   return new ethers.Contract(address, abi, provider);
 };
 
