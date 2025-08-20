@@ -1,16 +1,16 @@
 // Price service for fetching cryptocurrency prices
 export interface PriceData {
-  hbarUsd: number;
+  octUsd: number;
   timestamp: number;
 }
 
 let cachedPrice: PriceData | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const fetchHBARPrice = async (): Promise<number> => {
+export const fetchoctPrice = async (): Promise<number> => {
   // Check cache first
   if (cachedPrice && Date.now() - cachedPrice.timestamp < CACHE_DURATION) {
-    return cachedPrice.hbarUsd;
+    return cachedPrice.octUsd;
   }
 
   try {
@@ -25,7 +25,7 @@ export const fetchHBARPrice = async (): Promise<number> => {
       
       if (price) {
         cachedPrice = {
-          hbarUsd: price,
+          octUsd: price,
           timestamp: Date.now()
         };
         return price;
@@ -45,7 +45,7 @@ export const fetchHBARPrice = async (): Promise<number> => {
       
       if (price) {
         cachedPrice = {
-          hbarUsd: price,
+          octUsd: price,
           timestamp: Date.now()
         };
         return price;
@@ -57,11 +57,11 @@ export const fetchHBARPrice = async (): Promise<number> => {
 
   // Fallback to a reasonable default if APIs fail
   console.warn('All price APIs failed, using fallback price');
-  return 0.05; // Fallback HBAR price in USD
+  return 0.05; // Fallback oct price in USD
 };
 
-export const formatPriceInUSD = (hbarAmount: number, hbarPrice: number): string => {
-  const usdValue = hbarAmount * hbarPrice;
+export const formatPriceInUSD = (octAmount: number, octPrice: number): string => {
+  const usdValue = octAmount * octPrice;
   
   if (usdValue < 1) {
     return `$${usdValue.toFixed(4)}`;
@@ -72,7 +72,7 @@ export const formatPriceInUSD = (hbarAmount: number, hbarPrice: number): string 
   }
 };
 
-export const convertHBARToUSD = (hbarAmount: string | number, hbarPrice: number): number => {
-  const hbarValue = typeof hbarAmount === 'string' ? parseFloat(hbarAmount) : hbarAmount;
-  return hbarValue * hbarPrice;
+export const convertoctToUSD = (octAmount: string | number, octPrice: number): number => {
+  const octValue = typeof octAmount === 'string' ? parseFloat(octAmount) : octAmount;
+  return octValue * octPrice;
 };

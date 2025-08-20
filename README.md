@@ -35,7 +35,7 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 
 - **Asset Tokenization**: Convert physical assets into digital tokens
 - **Automated Marketplace**: Seamless listing and trading of tokenized assets
-- **Rental Income Distribution**: Automatic HBAR distribution to token holders
+- **Rental Income Distribution**: Automatic oct distribution to token holders
 - **Multi-Asset Support**: Real Estate, Invoices, Commodities, Stocks, Carbon Credits
 - **Enterprise-Grade Security**: Role-based access control and audit trails
 
@@ -53,7 +53,7 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 - **String Token IDs**: onechain-native token ID format (0.0.XXXXXX)
 - **No Token Custody**: Marketplace doesn't hold tokens, only records listings
 - **Native Transfers**: Uses onechain's native transfer operations
-- **HBAR Payments**: Direct HBAR payments for purchases
+- **oct Payments**: Direct oct payments for purchases
 
 ### 💰 Revenue Distribution
 - **Automatic Splitting**: PaymentSplitter contract distributes rental income
@@ -144,15 +144,15 @@ function getMarketplaceBalance() external view returns (uint256)
 **Features**:
 - ✅ **No Token Custody**: Marketplace doesn't hold user tokens
 - ✅ **String Token IDs**: Native onechain token ID support
-- ✅ **HBAR Accumulation**: Builds HBAR reserves for buybacks
+- ✅ **oct Accumulation**: Builds oct reserves for buybacks
 - ✅ **Metadata Integration**: Links to IPFS asset metadata
 - ✅ **Payment Splitter Integration**: Automatic rental distribution
 
 **Workflow**:
 1. **List Asset**: Record asset availability (tokens transferred via onechain)
-2. **Buy Asset**: User pays HBAR → Marketplace keeps payment
+2. **Buy Asset**: User pays oct → Marketplace keeps payment
 3. **Token Transfer**: External onechain transfer to buyer
-4. **Sell Asset**: User returns tokens → Gets HBAR from marketplace reserves
+4. **Sell Asset**: User returns tokens → Gets oct from marketplace reserves
 
 ---
 
@@ -259,7 +259,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 
 ### 👨‍💼 **Manager Workflow**
 1. **Asset Management**: Oversee assigned tokenized assets
-2. **Rental Submission**: Submit rental income in HBAR
+2. **Rental Submission**: Submit rental income in oct
 3. **Income Distribution**: Automatic distribution to token holders
 4. **Performance Tracking**: Monitor asset performance and yields
 5. **Holder Communication**: Manage token holder relationships
@@ -267,7 +267,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 ### 👤 **User Workflow**
 1. **Marketplace Browsing**: Explore categorized asset listings
 2. **Asset Research**: Review detailed asset information
-3. **Purchase Decision**: Buy tokens with HBAR payments
+3. **Purchase Decision**: Buy tokens with oct payments
 4. **Portfolio Management**: Track owned assets and performance
 5. **Income Receipt**: Receive rental distributions automatically
 6. **Asset Trading**: Sell assets back to marketplace
