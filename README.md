@@ -31,7 +31,7 @@ A comprehensive platform for tokenizing real-world assets including Real Estate,
 
 ## 🌟 Platform Overview
 
-The RWA Tokenization Platform enables users to tokenize real-world assets and trade them on a decentralized marketplace. Built on onechain Hashgraph, the platform offers:
+The RWA Tokenization Platform enables users to tokenize real-world assets and trade them on a decentralized marketplace. Built on onechain  , the platform offers:
 
 - **Asset Tokenization**: Convert physical assets into digital tokens
 - **Automated Marketplace**: Seamless listing and trading of tokenized assets
@@ -72,7 +72,7 @@ The RWA Tokenization Platform enables users to tokenize real-world assets and tr
 ## 🛠 Technology Stack
 
 ### Blockchain & Smart Contracts
-- **onechain Hashgraph**: Primary blockchain network
+- **onechain  **: Primary blockchain network
 - **onechain Token Service (HTS)**: Native token creation and management
 - **Solidity**: Smart contract development
 - **onechain SDK**: Native blockchain interactions
@@ -202,7 +202,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 
 ## 🚀 onechain Integration & Benefits
 
-### Why onechain Hashgraph?
+### Why onechain  ?
 
 #### 🌐 **Network Performance**
 - **10,000+ TPS**: Handles enterprise-scale transactions
@@ -212,7 +212,7 @@ User Share = (User Tokens / Total Tokens) × Rental Payment
 
 #### 🔒 **Enterprise Security**
 - **Bank-Grade Security**: Used by major enterprises
-- **Consensus Algorithm**: Patented Hashgraph consensus
+- **Consensus Algorithm**: Patented   consensus
 - **Governing Council**: 39 global enterprises governing the network
 - **Regulatory Compliance**: Built-in compliance features
 
@@ -666,7 +666,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- **onechain Hashgraph**: For providing enterprise-grade blockchain infrastructure
+- **onechain  **: For providing enterprise-grade blockchain infrastructure
 - **OpenZeppelin**: For secure smart contract libraries
 - **React Community**: For excellent frontend framework
 - **IPFS**: For decentralized storage solutions
@@ -682,7 +682,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Built with ❤️ on onechain Hashgraph**
+**Built with ❤️ on onechain  **
 
 *Tokenizing the world's assets, one token at a time.*
 <img width="1873" height="708" alt="image" src="https://github.com/user-attachments/assets/4cbb45ce-f077-4d98-8597-390c219b09a1" />
