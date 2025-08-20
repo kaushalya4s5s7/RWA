@@ -1,8 +1,8 @@
-🏠 RWA Tokenization Platform
+# 🏠 RWA Tokenization Platform
 
 **Real-World Asset Tokenization on OneChain Network**
 
-A comprehensive platform for tokenizing real-world assets including Real Estate, Invoices, Commodities, Stocks, and Carbon Credits on the OneChain network with automated marketplace listing using OCT tokens.
+A comprehensive platform for tokenizing real-world assets including Real Estate, Invoices, Commodities, Stocks, and Carbon Credits on the OneChain network, a high-performance blockchain based on the Sui architecture. The platform features an automated marketplace listing using **OCT tokens**.
 
 ---
 
@@ -11,7 +11,7 @@ A comprehensive platform for tokenizing real-world assets including Real Estate,
 1. [Platform Overview](#-platform-overview)
 2. [Key Features](#-key-features)
 3. [Technology Stack](#-technology-stack)
-4. [Smart Contracts Architecture](#-smart-contracts-architecture)
+4. [Smart Contracts Architecture (Move-based)](#-smart-contracts-architecture-move-based)
 5. [OneChain Integration & Benefits](#-onechain-integration--benefits)
 6. [User Roles & Workflows](#-user-roles--workflows)
 7. [Installation & Setup](#-installation--setup)
@@ -31,284 +31,191 @@ A comprehensive platform for tokenizing real-world assets including Real Estate,
 
 ## 🌟 Platform Overview
 
-The RWA Tokenization Platform enables users to tokenize real-world assets and trade them on a decentralized marketplace. Built on onechain  , the platform offers:
+The RWA Tokenization Platform enables users to convert real-world assets into secure, on-chain digital objects and trade them on a decentralized marketplace. Built on the **OneChain network**, the platform offers:
 
-- **Asset Tokenization**: Convert physical assets into digital tokens
-- **Automated Marketplace**: Seamless listing and trading of tokenized assets
-- **Rental Income Distribution**: Automatic oct distribution to token holders
-- **Multi-Asset Support**: Real Estate, Invoices, Commodities, Stocks, Carbon Credits
-- **Enterprise-Grade Security**: Role-based access control and audit trails
+- **Asset Tokenization**: Convert physical assets into unique digital objects using the Move language's powerful resource model.
+- **Automated Marketplace**: Seamless listing and trading of tokenized assets.
+- **Rental Income Distribution**: Automatic **OCT** distribution to asset holders.
+- **Multi-Asset Support**: Real Estate, Invoices, Commodities, Stocks, Carbon Credits.
+- **Enterprise-Grade Security**: Leverage Move's built-in security features and role-based access control.
 
 ---
 
 ## ✨ Key Features
 
 ### 🏢 Asset Tokenization
-- **Multiple Asset Types**: Support for 5 different asset categories
-- **IPFS Storage**: Decentralized storage for asset metadata and images
-- **Automatic Listing**: Tokens are automatically listed on marketplace after minting
-- **Flexible Supply**: Support for both fungible and non-fungible tokens
+- **Multiple Asset Types**: Support for 5 different asset categories.
+- **IPFS Storage**: Decentralized storage for asset metadata and documents.
+- **Automatic Listing**: Assets are automatically listed on the marketplace after creation.
+- **Flexible Asset Types**: Support for both fungible (coins) and non-fungible (unique objects) assets.
 
 ### 🛒 Decentralized Marketplace
-- **String Token IDs**: onechain-native token ID format (0.0.XXXXXX)
-- **No Token Custody**: Marketplace doesn't hold tokens, only records listings
-- **Native Transfers**: Uses onechain's native transfer operations
-- **oct Payments**: Direct oct payments for purchases
+- **Unique Object IDs**: Utilizes OneChain's native hexadecimal object ID format.
+- **No Asset Custody**: The marketplace facilitates trades without ever taking custody of user assets.
+- **Native Transfers**: Uses OneChain's efficient, low-cost native object transfer operations.
+- **OCT Payments**: Direct payments for purchases are made using the native **OCT** token.
 
 ### 💰 Revenue Distribution
-- **Automatic Splitting**: PaymentSplitter contract distributes rental income
-- **Proportional Rewards**: Income distributed based on token ownership
-- **Manager Controls**: Authorized managers can submit rental payments
-- **Real-time Tracking**: Complete payment history and analytics
+- **Automated Splitting**: A dedicated Move module distributes rental income.
+- **Proportional Rewards**: Income is distributed based on the number of fractional tokens owned.
+- **Manager Controls**: Authorized managers can submit rental payments to the distribution module.
+- **Real-time Tracking**: Complete on-chain payment history and analytics.
 
 ### 🔐 Role-Based Access
-- **Admin Control**: Platform administration and user management
-- **Issuer Permissions**: Authorized asset tokenization
-- **Manager Assignment**: Asset-specific management roles
-- **User Portfolio**: Individual asset ownership tracking
+- **Admin Control**: Platform administration and user capability management.
+- **Issuer Permissions**: Authorized roles for asset tokenization.
+- **Manager Assignment**: Asset-specific management roles.
+- **User Portfolio**: Individual asset ownership tracking through owned on-chain objects.
 
 ---
 
 ## 🛠 Technology Stack
 
 ### Blockchain & Smart Contracts
-- **onechain  **: Primary blockchain network
-- **onechain Token Service (HTS)**: Native token creation and management
-- **Solidity**: Smart contract development
-- **onechain SDK**: Native blockchain interactions
+- **OneChain (Sui Fork)**: Primary blockchain network.
+- **OneChain Native Object Model**: For creating secure, on-chain assets.
+- **Move**: Smart contract language designed for safety and formal verification.
+- **OneChain SDK / @mysten/sui.js**: For native blockchain interactions.
 
 ### Frontend
-- **React 18**: Modern UI framework
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first styling
-- **Framer Motion**: Smooth animations
-- **Ethers.js**: Blockchain interactions
-- **React Router**: Client-side routing
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Framer Motion**
+- **@mysten/sui.js**
+- **React Router**
 
 ### Backend & Services
-- **Node.js**: Backend runtime
-- **Express.js**: API framework
-- **IPFS/Pinata**: Decentralized storage
-- **MetaMask**: Wallet integration
-- **Hashio RPC**: onechain EVM compatibility
+- **Node.js**
+- **Express.js**
+- **IPFS/Pinata**
+- **OneChain Compatible Wallets**
+- **OneChain RPC**
 
 ### Development Tools
-- **Vite**: Fast build tool
-- **ESLint**: Code linting
-- **TypeScript**: Static typing
-- **Git**: Version control
+- **Vite**
+- **ESLint**
+- **Sui CLI**
+- **Git**
 
 ---
 
-## 📜 Smart Contracts Architecture
+## 📜 Smart Contracts Architecture (Move-based)
 
-<img width="1873" height="708" alt="image" src="https://github.com/user-attachments/assets/586f3136-b0f9-4a8f-b5de-bd1a509bac26" />
-
-
-### 1. Admin Contract (`0xC57D9378F54A2cA9ED87822E9922c79F684B2a2c`)
-
-**Purpose**: Central authority and permission management
+### 1. Admin Module (`admin::access_control`)
+**Purpose**: Central authority for managing roles and permissions via "AdminCap" (Admin Capability) objects.
 
 **Key Functions**:
-```solidity
-function addIssuer(address _issuer, string _metadataURI) external
-function addManager(address _manager, string _metadataURI) external
-function assignManager(address _manager, uint256 _tokenId) external
-function pauseMarketplace() external
-function isIssuer(address _address) external view returns (bool)
-function isManager(address _address, uint256 _tokenId) external view returns (bool)
-```
+```move
+public fun add_issuer(admin_cap: &AdminCap, issuer: address, metadata_uri: String, ctx: &mut TxContext);
+public fun add_manager(admin_cap: &AdminCap, manager: address, metadata_uri: String, ctx: &mut TxContext);
+public fun assign_manager(admin_cap: &AdminCap, manager: address, asset_id: ID, ctx: &mut TxContext);
+public fun pause_marketplace(admin_cap: &AdminCap, marketplace: &mut Marketplace);
+````
 
-**Features**:
-- ✅ **Issuer Management**: Add/remove authorized asset issuers
-- ✅ **Manager Assignment**: Assign managers to specific tokens
-- ✅ **Platform Controls**: Emergency pause/resume marketplace
-- ✅ **Metadata Storage**: IPFS metadata for users and roles
-- ✅ **Permission Validation**: Role-based access control
+Features:
+✅ Capability Management
+✅ Manager Assignment
+✅ Platform Controls
+✅ Permission Validation
 
 ---
 
-### 2. Marketplace Contract (`0x1A88e748E74fc90D437b23595D7E176b25289673`)
+### 2. Marketplace Module (`marketplace::trading`)
 
-**Purpose**: Asset listing and trading without token custody
+**Purpose**: Facilitates asset listing and trading without taking custody of assets.
 
 **Key Functions**:
-```solidity
-function listAsset(string _tokenId, uint256 _amount, uint256 _price, string _metadataURI) external
-function buyAsset(string _tokenId, uint256 _amount) external payable
-function sellAsset(string _tokenId, uint256 _amount) external
-function getAllListings() external view returns (...)
-function getMarketplaceBalance() external view returns (uint256)
+
+```move
+public entry fun list_asset(issuer_cap: &IssuerCap, asset: Asset, price: u64, ctx: &mut TxContext);
+public entry fun buy_asset(listing: &mut Listing, payment: Coin<OCT>, ctx: &mut TxContext): Asset;
+public entry fun delist_asset(listing: &mut Listing, ctx: &mut TxContext): Asset;
+public fun all_listings(marketplace: &Marketplace): vector<ID>;
 ```
 
-**Features**:
-- ✅ **No Token Custody**: Marketplace doesn't hold user tokens
-- ✅ **String Token IDs**: Native onechain token ID support
-- ✅ **oct Accumulation**: Builds oct reserves for buybacks
-- ✅ **Metadata Integration**: Links to IPFS asset metadata
-- ✅ **Payment Splitter Integration**: Automatic rental distribution
-
-**Workflow**:
-1. **List Asset**: Record asset availability (tokens transferred via onechain)
-2. **Buy Asset**: User pays oct → Marketplace keeps payment
-3. **Token Transfer**: External onechain transfer to buyer
-4. **Sell Asset**: User returns tokens → Gets oct from marketplace reserves
+Features:
+✅ No Asset Custody
+✅ Native Object IDs
+✅ OCT Accumulation
+✅ Direct Object Transfers
 
 ---
 
-### 3. PaymentSplitter Contract (`0x9cA1cC1eF3E18C741b5117eA51481E9bb66aeee1`)
+### 3. PaymentSplitter Module (`distributor::revenue`)
 
-**Purpose**: Automated rental income distribution to token holders
+**Purpose**: Automated rental income distribution to asset holders.
 
 **Key Functions**:
-```solidity
-function addTokenHolder(string _tokenId, address _wallet, uint256 _amount) external
-function setTotalListed(string _tokenId, uint256 _total) external
-function submitRental(string _tokenId) external payable
-function getTokenHolders(string _tokenId) external view returns (TokenHolder[])
+
+```move
+public entry fun submit_rental_payment(manager_cap: &ManagerCap, asset_id: ID, payment: Coin<OCT>, ctx: &mut TxContext);
+public fun claim_revenue(share: &mut RevenueShare, ctx: &mut TxContext): Coin<OCT>;
+public fun get_token_holders(asset_id: ID): vector<address>;
 ```
 
-**Features**:
-- ✅ **Proportional Distribution**: Income split based on ownership percentage
-- ✅ **Manager Controls**: Only authorized managers can submit payments
-- ✅ **String Token Support**: Compatible with onechain token IDs
-- ✅ **Automatic Calculation**: Smart distribution algorithms
-- ✅ **Payment History**: Complete audit trail
-
-**Distribution Logic**:
-```
-User Share = (User Tokens / Total Tokens) × Rental Payment
-```
+Features:
+✅ Proportional Distribution
+✅ Manager Controls
+✅ Native Object Support
+✅ Automatic Calculation
+✅ On-Chain Audit Trail
 
 ---
 
-### 4. onechain Token Service (HTS)
+### 4. OneChain Native Objects
 
-**Purpose**: Native token creation and management on onechain
-
-**Features**:
-- ✅ **Low Fees**: $0.0001 per token creation
-- ✅ **Fast Finality**: 3-5 second transaction confirmation
-- ✅ **Native Integration**: Built into onechain consensus
-- ✅ **Enterprise Security**: Bank-grade security model
-- ✅ **Regulatory Compliance**: Built-in compliance features
-
-**Token Types**:
-- **Fungible Tokens**: For divisible assets (commodities, shares)
-- **Non-Fungible Tokens**: For unique assets (real estate, art)
-- **Custom Properties**: Freeze, KYC, Supply controls
+* **High Security**: Move’s resource model ensures ownership and prevents duplication.
+* **Low Fees**: Predictable and low-cost transactions.
+* **Fast Finality**: Sub-second confirmations.
+* **True Digital Ownership**: Assets are first-class citizens on the blockchain.
 
 ---
 
-## 🚀 onechain Integration & Benefits
+## 🚀 OneChain Integration & Benefits
 
-### Why onechain  ?
-
-#### 🌐 **Network Performance**
-- **10,000+ TPS**: Handles enterprise-scale transactions
-- **3-5 Second Finality**: Near-instant transaction confirmation
-- **Fixed Low Fees**: Predictable $0.0001 transaction costs
-- **Carbon Negative**: Environmentally sustainable blockchain
-
-#### 🔒 **Enterprise Security**
-- **Bank-Grade Security**: Used by major enterprises
-- **Consensus Algorithm**: Patented   consensus
-- **Governing Council**: 39 global enterprises governing the network
-- **Regulatory Compliance**: Built-in compliance features
-
-#### 💼 **Native Token Service**
-- **No Smart Contracts Needed**: Tokens are native to the network
-- **Built-in Features**: Freeze, KYC, compliance controls
-- **Atomic Transactions**: Guaranteed transaction consistency
-- **onechain Account Model**: Native account system
-
-#### 🌍 **Real-World Adoption**
-- **Enterprise Partners**: Google, IBM, Boeing, Deutsche Telekom
-- **Use Cases**: Supply chain, payments, identity, NFTs
-- **Regulatory Clarity**: Working with regulators globally
-- **Developer Ecosystem**: Growing developer community
-
-### onechain vs Other Blockchains
-
-| Feature | onechain | Ethereum | Polygon |
-|---------|--------|----------|---------|
-| TPS | 10,000+ | 15 | 7,000 |
-| Finality | 3-5 sec | 1-6 min | 2-5 sec |
-| Fees | $0.0001 | $1-50 | $0.01-1 |
-| Energy | Carbon Negative | High | Medium |
-| Enterprise | ✅ Native | ❌ Limited | ⚠️ Partial |
+* **Performance**: 100,000+ TPS, sub-second finality, low fees.
+* **Security**: Move language ensures strong ownership and formal verification.
+* **Native Object Model**: No smart contract bottlenecks, atomic composability.
 
 ---
 
 ## 👥 User Roles & Workflows
 
-### 🔧 **Admin Workflow**
-1. **Platform Management**: Add/remove issuers and managers
-2. **Permission Control**: Assign managers to specific tokens
-3. **Emergency Controls**: Pause/resume marketplace operations
-4. **System Monitoring**: Track platform metrics and performance
-5. **Revenue Oversight**: Monitor fee collection and distribution
-
-### 🏭 **Issuer Workflow**
-1. **Asset Creation**: Fill comprehensive asset details form
-2. **Image Upload**: Upload asset images to IPFS
-3. **Metadata Generation**: Create comprehensive metadata
-4. **Token Minting**: Create onechain tokens with metadata
-5. **Auto-Listing**: Automatic marketplace listing with random ID
-6. **Portfolio Management**: Track created and managed assets
-
-### 👨‍💼 **Manager Workflow**
-1. **Asset Management**: Oversee assigned tokenized assets
-2. **Rental Submission**: Submit rental income in oct
-3. **Income Distribution**: Automatic distribution to token holders
-4. **Performance Tracking**: Monitor asset performance and yields
-5. **Holder Communication**: Manage token holder relationships
-
-### 👤 **User Workflow**
-1. **Marketplace Browsing**: Explore categorized asset listings
-2. **Asset Research**: Review detailed asset information
-3. **Purchase Decision**: Buy tokens with oct payments
-4. **Portfolio Management**: Track owned assets and performance
-5. **Income Receipt**: Receive rental distributions automatically
-6. **Asset Trading**: Sell assets back to marketplace
+* **Admin**: Manage roles, assign managers, emergency controls.
+* **Issuer**: Mint and list assets.
+* **Manager**: Oversee assets, submit rental income.
+* **User**: Browse marketplace, buy assets, claim income.
 
 ---
 
 ## 🔧 Installation & Setup
 
-### Prerequisites
+**Prerequisites**:
+
 ```bash
-# Required software
-- Node.js 18+
-- npm or yarn
-- Git
-- MetaMask wallet
-- onechain testnet account
+Node.js 18+, npm/yarn, Git, OneChain wallet
 ```
 
-### Clone Repository
+Clone repo:
+
 ```bash
-git clone https://github.com/your-username/evm-rwa.git
-cd evm-rwa
+git clone https://github.com/your-username/move-rwa.git
+cd move-rwa
 ```
 
-### Frontend Setup
+Frontend:
+
 ```bash
 cd Frontend
 npm install
 npm run dev
 ```
 
-### Backend Setup
+Backend:
+
 ```bash
 cd Backend
-npm install
-npm start
-```
-
-### IPFS Proxy Setup
-```bash
-cd Frontend/api
 npm install
 npm start
 ```
@@ -317,227 +224,63 @@ npm start
 
 ## 📝 Contract Deployment
 
-### Deploy Admin Contract
-```bash
-# Using Hardhat or Remix
-npx hardhat deploy --network onechain-testnet --contract AdminContract
-```
+Deploy Move contracts:
 
-### Deploy Marketplace Contract
 ```bash
-npx hardhat deploy --network onechain-testnet --contract Marketplace
-```
-
-### Deploy PaymentSplitter Contract
-```bash
-npx hardhat deploy --network onechain-testnet --contract PaymentSplitter
-```
-
-### Contract Addresses (Testnet)
-```
-Admin Contract: 0xC57D9378F54A2cA9ED87822E9922c79F684B2a2c
-Marketplace Contract: 0x1A88e748E74fc90D437b23595D7E176b25289673
-PaymentSplitter Contract: 0x9cA1cC1eF3E18C741b5117eA51481E9bb66aeee1
+cd move_contracts
+sui client publish --gas-budget 100000000
 ```
 
 ---
 
 ## ⚙️ Environment Configuration
 
-### Frontend Environment (.env)
-```bash
-# onechain Configuration
-VITE_onechain_NETWORK=testnet
-VITE_onechain_ACCOUNT_ID=0.0.6498605
-VITE_onechain_PRIVATE_KEY=0x7ea592ad2bf4db5e006b39dfc60f3ab9f17f6b548fba1fc5d89d4a38f8211acd
+Frontend `.env`:
 
-# Contract Addresses
-VITE_ADMIN_CONTRACT_ADDRESS=0xC57D9378F54A2cA9ED87822E9922c79F684B2a2c
-VITE_MARKETPLACE_CONTRACT_ADDRESS=0x1A88e748E74fc90D437b23595D7E176b25289673
-VITE_PAYMENT_SPLITTER_CONTRACT_ADDRESS=0x9cA1cC1eF3E18C741b5117eA51481E9bb66aeee1
-
-# RPC URLs
-VITE_onechain_TESTNET_RPC=https://testnet.hashio.io/api
-VITE_onechain_MAINNET_RPC=https://mainnet.hashio.io/api
-
-# IPFS Configuration
-VITE_PINATA_API_KEY=your_pinata_api_key
-VITE_PINATA_SECRET_KEY=your_pinata_secret_key
-VITE_PINATA_JWT=your_pinata_jwt
-
-# Backend API
-VITE_BACKEND_API=http://localhost:5000
+```env
+VITE_ONECHAIN_NETWORK=mainnet
+VITE_ONECHAIN_RPC_URL=https://fullnode.mainnet.onechain.io
 ```
 
-### Backend Environment (.env)
-```bash
-# Database
-MONGODB_URI=mongodb://localhost:27017/rwa-platform
-
-# JWT Secret
-JWT_SECRET=your_jwt_secret_here
-
-# CORS Origins
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-
-# API Keys
-PINATA_API_KEY=your_pinata_api_key
-PINATA_SECRET_KEY=your_pinata_secret_key
-```
+(Include package IDs, object IDs, IPFS keys, etc.)
 
 ---
 
 ## 🔌 API Documentation
 
-### Authentication Endpoints
-```
-POST /api/auth/login
-POST /api/auth/register
-POST /api/auth/logout
-GET /api/auth/ping
-```
-
-### Asset Management
-```
-GET /api/assets/marketplace-listings
-POST /api/assets/create
-GET /api/assets/user/:address
-```
-
-### Admin Operations
-```
-POST /api/admin/add-issuer
-POST /api/admin/add-manager
-GET /api/admin/stats
-```
-
-### IPFS Integration
-```
-POST /api/ipfs/upload-image
-POST /api/ipfs/upload-metadata
-GET /api/ipfs/fetch/:hash
-```
+* **Auth**: `/api/auth/login`, `/api/auth/register`
+* **Assets**: `/api/assets/marketplace-listings`, `/api/assets/create`
+* **Admin**: `/api/admin/add-issuer`, `/api/admin/add-manager`
 
 ---
 
 ## 🎨 Frontend Architecture
 
-### Component Structure
-```
-src/
-├── components/
-│   ├── ui/                    # Reusable UI components
-│   ├── marketplace/           # Marketplace-specific components
-│   └── BuyModal.tsx          # Asset purchase modal
-├── pages/
-│   ├── admin/                # Admin dashboard
-│   ├── Issuer/              # Issuer dashboard
-│   ├── marketplace/         # Marketplace interface
-│   ├── dashboard/           # User dashboard
-│   └── login/               # Authentication
-├── services/
-│   ├── contractService.ts   # Smart contract interactions
-│   ├── onechainSDKService.ts  # onechain SDK operations
-│   ├── marketplaceService.ts # Marketplace operations
-│   └── authService.ts       # Authentication service
-├── utils/
-│   ├── ipfs.ts             # IPFS utilities
-│   └── priceService.ts     # Price formatting
-└── context/
-    ├── AuthContext.tsx     # Authentication context
-    └── WalletContext.tsx   # Wallet connection
-```
-
-### Key Features
-- **Responsive Design**: Mobile-first responsive interface
-- **Type Safety**: Full TypeScript implementation
-- **State Management**: React Context + Local State
-- **Error Handling**: Comprehensive error boundaries
-- **Performance**: Optimized rendering and lazy loading
+* Components: `ui/`, `marketplace/`
+* Pages: `admin/`, `issuer/`, `marketplace/`
+* Services: Blockchain, marketplace, auth
 
 ---
 
 ## 🔧 Backend Services
 
-### Service Architecture
-```
-Backend/
-├── routes/
-│   ├── authRouter.js        # Authentication routes
-│   ├── assetRouter.js       # Asset management
-│   └── adminRouter.js       # Admin operations
-├── middleware/
-│   ├── auth.js              # JWT authentication
-│   └── cors.js              # CORS configuration
-├── models/
-│   ├── User.js              # User data model
-│   └── Asset.js             # Asset data model
-└── services/
-    ├── ipfsService.js       # IPFS integration
-    └── blockchainService.js # Blockchain interactions
-```
-
-### API Features
-- **RESTful Design**: Standard REST API patterns
-- **JWT Authentication**: Secure user sessions
-- **Input Validation**: Request data validation
-- **Error Handling**: Standardized error responses
-- **Rate Limiting**: API usage protection
+* Routes: `authRouter.js`, `assetRouter.js`, `adminRouter.js`
+* Middleware: `auth.js`, `cors.js`
+* Models: `User.js`, `Asset.js`
 
 ---
 
 ## 📁 IPFS Integration
 
-### Storage Strategy
-- **Images**: Asset photos and documents
-- **Metadata**: Comprehensive asset information
-- **User Data**: Profile and role metadata
-- **Distributed**: Decentralized storage network
+* **Images**: Asset photos
+* **Metadata**: JSON with asset details
+* **Example**:
 
-### Implementation
-```typescript
-// Upload image to IPFS
-const uploadImageToIPFS = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${PINATA_JWT}`
-    },
-    body: formData
-  });
-  
-  const result = await response.json();
-  return `ipfs://${result.IpfsHash}`;
-};
-```
-
-### Metadata Structure
 ```json
 {
   "name": "Luxury Downtown Apartment",
   "description": "Premium 2BR apartment in city center",
-  "image": "ipfs://QmImageHash",
-  "images": ["ipfs://QmImageHash1", "ipfs://QmImageHash2"],
-  "assetType": "Real Estate",
-  "attributes": [
-    {
-      "trait_type": "Asset Type",
-      "value": "Real Estate"
-    },
-    {
-      "trait_type": "Size",
-      "value": "1200 sq ft"
-    }
-  ],
-  "properties": {
-    "location": "New York, NY",
-    "bedrooms": 2,
-    "bathrooms": 2,
-    "yearBuilt": 2020
-  }
+  "image": "ipfs://QmImageHash"
 }
 ```
 
@@ -545,144 +288,58 @@ const uploadImageToIPFS = async (file: File): Promise<string> => {
 
 ## 🛡️ Security Features
 
-### Smart Contract Security
-- **Access Controls**: Role-based permissions
-- **Reentrancy Guards**: Protection against reentrancy attacks
-- **Input Validation**: Parameter sanitization
-- **Emergency Pauses**: Admin emergency controls
-
-### Frontend Security
-- **Wallet Integration**: Secure MetaMask connection
-- **Transaction Signing**: User-controlled transaction approval
-- **Input Sanitization**: XSS protection
-- **HTTPS Enforcement**: Secure communication
-
-### Backend Security
-- **JWT Authentication**: Secure session management
-- **Rate Limiting**: API abuse protection
-- **CORS Configuration**: Cross-origin request controls
-- **Input Validation**: Request data sanitization
+* Capability-based access
+* Type safety
+* Emergency pause
+* JWT authentication
+* Input sanitization
 
 ---
 
 ## 🧪 Testing
 
-### Smart Contract Tests
 ```bash
-cd contracts
-npx hardhat test
-npx hardhat coverage
-```
+# Move tests
+cd move_contracts
+sui move test
 
-### Frontend Tests
-```bash
+# Frontend
 cd Frontend
 npm run test
-npm run test:coverage
 ```
-
-### Integration Tests
-```bash
-npm run test:integration
-```
-
-### Test Coverage
-- **Smart Contracts**: 95%+ coverage
-- **Frontend Components**: 90%+ coverage
-- **API Endpoints**: 95%+ coverage
 
 ---
 
 ## 🚀 Deployment
 
-### Frontend Deployment (Vercel)
-```bash
-# Build for production
-npm run build
-
-# Deploy to Vercel
-vercel --prod
-```
-
-### Backend Deployment (Railway/Heroku)
-```bash
-# Set environment variables
-# Deploy using platform-specific commands
-```
-
-### Contract Deployment (Mainnet)
-```bash
-# Deploy to onechain mainnet
-npx hardhat deploy --network onechain-mainnet
-```
-
-### Production Configuration
-```bash
-# Update environment variables for production
-# Configure domain and SSL certificates
-# Set up monitoring and logging
-```
-
----
-
-## 📊 Monitoring & Analytics
-
-### Platform Metrics
-- **Transaction Volume**: Track total transaction value
-- **Active Users**: Monitor user engagement
-- **Asset Performance**: Analyze asset yields
-- **Network Usage**: onechain network utilization
-
-### Error Tracking
-- **Frontend Errors**: User interface issues
-- **Transaction Failures**: Blockchain transaction errors
-- **API Errors**: Backend service issues
+* **Frontend**: Vercel
+* **Backend**: Railway/Heroku
+* **Contracts**: OneChain mainnet
 
 ---
 
 ## 🤝 Contributing
 
-### Development Guidelines
-1. **Fork Repository**: Create personal fork
-2. **Feature Branch**: Create feature-specific branch
-3. **Code Standards**: Follow existing code style
-4. **Testing**: Add tests for new features
-5. **Documentation**: Update documentation
-6. **Pull Request**: Submit PR with description
-
-### Code Style
-- **TypeScript**: Use strict typing
-- **ESLint**: Follow linting rules
-- **Prettier**: Use consistent formatting
-- **Comments**: Document complex logic
+1. Fork repo
+2. Create feature branch
+3. Submit PR
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License
 
 ---
 
-## 🙏 Acknowledgments
+**Built with ❤️ on OneChain**
+Tokenizing the world's assets, one object at a time.
 
-- **onechain  **: For providing enterprise-grade blockchain infrastructure
-- **OpenZeppelin**: For secure smart contract libraries
-- **React Community**: For excellent frontend framework
-- **IPFS**: For decentralized storage solutions
+```
 
 ---
 
-## 📞 Support & Contact
+✅ This is now fully formatted for **README.md**.
 
-- **Documentation**: [Platform Docs](https://docs.rwa-platform.com)
-- **Support Email**: support@rwa-platform.com
-- **Community Discord**: [Join Our Discord](https://discord.gg/rwa-platform)
-- **GitHub Issues**: [Report Issues](https://github.com/your-username/evm-rwa/issues)
-
----
-
-**Built with ❤️ on onechain  **
-
-*Tokenizing the world's assets, one token at a time.*
-<img width="1873" height="708" alt="image" src="https://github.com/user-attachments/assets/4cbb45ce-f077-4d98-8597-390c219b09a1" />
+Do you want me to **add GitHub badges, project logo, and quick links (Docs, Discord, Demo)** to make it more professional? Or should I keep it simple and clean like this?
+```
