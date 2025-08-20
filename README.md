@@ -173,35 +173,12 @@ Features:
 📝 Contract Deployment
 Deploy Move Package
 
-Bash
-# Using the Sui CLI
+
+# Using the One CLI
 cd move_contracts
-sui client publish --gas-budget 100000000
-Deployed Package & Object IDs
+one client publish --gas-budget 100000000
 
-These are the official IDs for the platform's smart contracts and core objects on the OneChain network.
 
-OneChain Contract Package IDs
-
-ADMIN: 0xf80c253bc01793cb6d8815c38b9b6a665bacf9f2b2e32d29a39598a39fd51b29
-ISSUER_REGISTRY: 0x2b8f314190ecb97381c1b8a5efa62f8e21e9becaf637d82f538f5c00ce5932a0
-MARKETPLACE: 0x0c7a73e60f5ed8905b6e27eead169c75a9f410a4668e32e12c08d9dfbe9c7bfd
-RWA_ASSET: 0xa8812fbbd23a212d5ff03c9d1f7e1cb9164d95fde56d659cb75623bbf0a9b941
-ONE_FRAMEWORK: 0x2 (OneChain framework package)
-Core Object IDs (Deployed Instances)
-
-ISSUER_REGISTRY_OBJECT: 0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7
-MARKETPLACE_OBJECT: 0xb18514fa9c08de270a6df05ce2ecf06ba225218e4b10bebd595b8227bc46cdf9
-OCT Coin Type Definition
-
-The platform's native token, OCT, is defined by the following struct type.
-
-OCT_COIN_TYPE: 0x2::oct::OCT
-OCT_COIN_STRUCT: 0x2::coin::Coin<0x2::oct::OCT>
-⚙️ Environment Configuration
-Frontend Environment (.env)
-
-Bash
 # OneChain Configuration
 VITE_ONECHAIN_NETWORK=testnet
 VITE_ONECHAIN_RPC_URL=[https://rpc-testnet.onelabs.cc:443](https://rpc-testnet.onelabs.cc:443)
