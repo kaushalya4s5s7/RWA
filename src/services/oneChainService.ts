@@ -6,13 +6,14 @@ import { SuiClient } from '@mysten/sui/client';
 export // OneChain contract addresses and IDs
 const ONECHAIN_CONTRACTS = {
   // Core package IDs - updated to match successful CLI calls
-  ADMIN: '0xca67e096a90cd0efbeb7255346be54ab7707b149882475c447daae6caef1d5af',
-  ISSUER_REGISTRY: '0xe460db5069b62b397782c4f638911d1ae852d5c154ef3968be52e53d3179c2af',
-  MARKETPLACE: '0x346a89f2b25089791f7d909ac5fdc52e80ad92ff26f929ba2c541269b5e21312',
-  RWA_ASSET: '0xa535ba1ca80032203a344533fbffe4d9a9f2359322ef205d476ca8d0c710e8ca',
-   ISSUER_REGISTRY_OBJECT : '0x6c858122a388ebfaf088b1ba78293b74d1d634b1ea40d6e97c47bed32d96f622',
-  // Core object IDs
-  MARKETPLACE_OBJECT: '0x3333e19caa3cb65c719c5abb69d6b836b88c57729e5decdcad0e51feaaef8b16',
+  ADMIN: '0xf80c253bc01793cb6d8815c38b9b6a665bacf9f2b2e32d29a39598a39fd51b29',
+  ISSUER_REGISTRY: '0x2b8f314190ecb97381c1b8a5efa62f8e21e9becaf637d82f538f5c00ce5932a0',
+  MARKETPLACE: '0x0c7a73e60f5ed8905b6e27eead169c75a9f410a4668e32e12c08d9dfbe9c7bfd',
+  RWA_ASSET: '0xa8812fbbd23a212d5ff03c9d1f7e1cb9164d95fde56d659cb75623bbf0a9b941',
+  
+  // Core object IDs (actual deployed object instances) - UPDATED
+  ISSUER_REGISTRY_OBJECT: '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7', // NEW issuer registry object
+  MARKETPLACE_OBJECT: '0xb18514fa9c08de270a6df05ce2ecf06ba225218e4b10bebd595b8227bc46cdf9', // NEW marketplace object
   
   // OneChain framework package ID - corrected for OneChain
   ONE_FRAMEWORK: '0x2', // OneChain framework package ID
@@ -69,9 +70,9 @@ export class OneChainService {
     issuerRegistryId?: string
   ): Promise<{ success: boolean; objectId?: string; error?: string }> {
     try {
-      // Default object IDs if not provided
-      const defaultIssuerCapId = issuerCapId || '0x233290230d46ecc0985e073a1c17604bd2a0dcd33010a0cbc5cde49abd6da4b6';
-      const defaultRegistryId = issuerRegistryId || '0x63e4eabad8715cb099d6a24084af925a51a6fb0f34e45cdc2f504c18f677a34e';
+      // Default object IDs if not provided - UPDATED with new contract objects
+      const defaultIssuerCapId = issuerCapId || '0x613da218834f4948ca4279fa0c981371e221b3b13726c3d86155957619a6372d';
+      const defaultRegistryId = issuerRegistryId || '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7';
       
       const tx = new Transaction();
       
@@ -110,13 +111,22 @@ export class OneChainService {
               
               // Extract the created object ID from the result
               const createdObjects = result.effects?.created || [];
+              console.log('🔍 Created objects:', createdObjects);
+              
+              // Look for the RWAAssetNFT object
               const nftObject = createdObjects.find((obj: any) => 
-                obj.owner && typeof obj.owner === 'object' && 'AddressOwner' in obj.owner
+                obj.owner && 'AddressOwner' in obj.owner && 
+                obj.objectType && obj.objectType.includes('RWAAssetNFT')
               );
+              
+              console.log('🎯 Found NFT Object:', nftObject);
+              
+              const objectId = nftObject?.reference?.objectId;
+              console.log('📋 Extracted Object ID:', objectId);
               
               resolve({
                 success: true,
-                objectId: nftObject?.reference?.objectId,
+                objectId: objectId,
               });
             },
             onError: (error: any) => {
@@ -139,6 +149,60 @@ export class OneChainService {
   }
 
   /**
+   * Create and Auto-List NFT using optimized sequential transactions
+   * Since Move contracts transfer assets immediately, we use fast sequential calls
+   */
+  async createAndListNFT(
+    data: TokenCreationData,
+    marketplacePrice: number, // Price in MIST for marketplace listing
+    signerAddress: string,
+    signAndExecuteTransaction: any,
+    issuerCapId?: string,
+    issuerRegistryId?: string
+  ): Promise<{ success: boolean; objectId?: string; error?: string }> {
+    try {
+      console.log('� Creating NFT and Auto-Listing (Optimized Sequential)');
+      
+      // Step 1: Create NFT first
+      const createResult = await this.createNFT(data, signerAddress, signAndExecuteTransaction, issuerCapId, issuerRegistryId);
+      
+      if (!createResult.success || !createResult.objectId) {
+        return createResult;
+      }
+      
+      console.log('✅ NFT Created:', createResult.objectId);
+      
+      // Step 2: List the created NFT immediately
+      console.log('📋 Auto-listing NFT on marketplace...');
+      const listResult = await this.listAsset(createResult.objectId, marketplacePrice, signerAddress, signAndExecuteTransaction, issuerRegistryId);
+      
+      if (!listResult.success) {
+        console.warn('⚠️  NFT created but listing failed:', listResult.error);
+        // Still return success since NFT was created
+        return {
+          success: true, 
+          objectId: createResult.objectId,
+          error: `NFT created successfully, but auto-listing failed: ${listResult.error}`
+        };
+      }
+      
+      console.log('🎯 NFT Created and Listed Successfully');
+      
+      return {
+        success: true,
+        objectId: createResult.objectId,
+      };
+      
+    } catch (error: any) {
+      console.error('❌ Error in Create+List NFT:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create and list NFT',
+      };
+    }
+  }
+
+  /**
    * Create RWA FT (Fungible Token) on OneChain
    */
   async createFT(
@@ -153,9 +217,9 @@ export class OneChainService {
       console.log('🎯 Creating FT with package:', ONECHAIN_CONTRACTS.RWA_ASSET);
       console.log('📦 Full target:', `${ONECHAIN_CONTRACTS.RWA_ASSET}::rwaasset::mint_asset_ft`);
       
-      // Default object IDs if not provided
-      const defaultIssuerCapId = issuerCapId || '0x233290230d46ecc0985e073a1c17604bd2a0dcd33010a0cbc5cde49abd6da4b6';
-      const defaultRegistryId = issuerRegistryId || '0x63e4eabad8715cb099d6a24084af925a51a6fb0f34e45cdc2f504c18f677a34e';
+      // Default object IDs if not provided - UPDATED with new contract objects
+      const defaultIssuerCapId = issuerCapId || '0x613da218834f4948ca4279fa0c981371e221b3b13726c3d86155957619a6372d';
+      const defaultRegistryId = issuerRegistryId || '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7';
       
       const tx = new Transaction();
       
@@ -185,18 +249,133 @@ export class OneChainService {
         signAndExecuteTransaction(
           { transaction: tx },
           {
-            onSuccess: (result: any) => {
+            onSuccess: async (result: any) => {
               console.log('✅ FT created successfully!', result);
               
-              // Extract the created object ID from the result
-              const createdObjects = result.effects?.created || [];
-              const ftObject = createdObjects.find((obj: any) => 
-                obj.owner && typeof obj.owner === 'object' && 'AddressOwner' in obj.owner
-              );
+              let objectId = null;
+              
+              // Method 1: Try objectChanges first (most reliable for newly created objects)
+              if (result.objectChanges) {
+                console.log('📋 Checking objectChanges:', result.objectChanges);
+                const createdChange = result.objectChanges.find((change: any) => 
+                  change.type === 'created' && 
+                  change.objectType && 
+                  change.objectType.includes('RWAAssetFT')
+                );
+                if (createdChange) {
+                  objectId = createdChange.objectId;
+                  console.log('🎯 Found FT via objectChanges:', objectId);
+                }
+              }
+              
+              // Method 2: Try effects.created (fallback if objectChanges doesn't work)
+              if (!objectId && result.effects?.created) {
+                console.log('� Checking effects.created:', result.effects.created);
+                const createdObj = result.effects.created.find((obj: any) => 
+                  obj.owner?.AddressOwner === signerAddress &&
+                  obj.objectType && obj.objectType.includes('RWAAssetFT')
+                );
+                if (createdObj) {
+                  objectId = createdObj.reference?.objectId;
+                  console.log('🎯 Found FT via effects.created:', objectId);
+                }
+              }
+              
+              // Method 3: Query transaction details using digest (most reliable)
+              if (!objectId && result.digest) {
+                try {
+                  console.log('🔍 Querying transaction details for digest:', result.digest);
+                  const txDetails = await this.suiClient.getTransactionBlock({
+                    digest: result.digest,
+                    options: {
+                      showEffects: true,
+                      showObjectChanges: true,
+                    }
+                  });
+                  
+                  console.log('📋 Transaction details:', txDetails);
+                  
+                  // Look in objectChanges first
+                  if (txDetails.objectChanges) {
+                    const createdFT = txDetails.objectChanges.find((change: any) => 
+                      change.type === 'created' && 
+                      change.objectType?.includes('RWAAssetFT') &&
+                      change.sender === signerAddress
+                    ) as any;
+                    if (createdFT) {
+                      objectId = createdFT.objectId;
+                      console.log('🎯 Found FT via transaction objectChanges:', objectId);
+                    }
+                  }
+                  
+                  // Look in effects.created if objectChanges didn't work
+                  if (!objectId && txDetails.effects?.created) {
+                    const createdObj = txDetails.effects.created.find((obj: any) => 
+                      obj.owner?.AddressOwner === signerAddress &&
+                      obj.objectType?.includes('RWAAssetFT')
+                    );
+                    if (createdObj) {
+                      objectId = createdObj.reference?.objectId;
+                      console.log('🎯 Found FT via transaction effects.created:', objectId);
+                    }
+                  }
+                } catch (error) {
+                  console.warn('⚠️ Could not query transaction details:', error);
+                }
+              }
+              
+              // Method 4: Query user's owned objects but filter by creation time
+              if (!objectId) {
+                try {
+                  console.log('🔄 Querying user owned objects to find the newest FT...');
+                  const ownedObjects = await this.suiClient.getOwnedObjects({
+                    owner: signerAddress,
+                    filter: {
+                      StructType: `${ONECHAIN_CONTRACTS.RWA_ASSET}::rwaasset::RWAAssetFT`,
+                    },
+                    options: {
+                      showContent: true,
+                      showType: true,
+                    },
+                  });
+                  
+                  console.log('📋 Found FT objects:', ownedObjects.data?.length || 0);
+                  
+                  if (ownedObjects.data && ownedObjects.data.length > 0) {
+                    // Sort by version (higher version = newer) and get the most recent
+                    const sortedFTs = ownedObjects.data.sort((a, b) => 
+                      parseInt(b.data?.version || '0') - parseInt(a.data?.version || '0')
+                    );
+                    const newestFT = sortedFTs[0];
+                    objectId = newestFT.data?.objectId;
+                    console.log('🎯 Found newest FT by version:', objectId, 'version:', newestFT.data?.version);
+                    
+                    // Additional verification: check if this FT was created recently
+                    if (newestFT.data?.content) {
+                      const ftFields = (newestFT.data.content as any)?.fields;
+                      console.log('📋 Newest FT fields:', {
+                        metadata_uri: ftFields?.metadata_uri,
+                        total_supply: ftFields?.total_supply,
+                        asset_type_index: ftFields?.asset_type_index
+                      });
+                    }
+                  }
+                } catch (error) {
+                  console.warn('⚠️ Could not query owned objects:', error);
+                }
+              }
+              
+              // Method 5: Final fallback - use digest if nothing else works
+              if (!objectId) {
+                objectId = result.digest;
+                console.log('⚠️ Using digest as fallback ID (will need manual extraction):', objectId);
+              }
+              
+              console.log('📋 Final Extracted Object ID:', objectId);
               
               resolve({
                 success: true,
-                objectId: ftObject?.reference?.objectId,
+                objectId: objectId,
               });
             },
             onError: (error: any) => {
@@ -219,6 +398,62 @@ export class OneChainService {
   }
 
   /**
+   * Create and Auto-List FT using optimized sequential transactions
+   * Since Move contracts transfer assets immediately, we use fast sequential calls
+   */
+  async createAndListFT(
+    data: TokenCreationData,
+    marketplacePrice: number, // Price in MIST for marketplace listing
+    signerAddress: string,
+    signAndExecuteTransaction: any,
+    issuerCapId?: string,
+    issuerRegistryId?: string
+  ): Promise<{ success: boolean; objectId?: string; error?: string }> {
+    try {
+      console.log('� Creating FT and Auto-Listing (Optimized Sequential)');
+      
+      // Step 1: Create FT first
+      const createResult = await this.createFT(data, signerAddress, signAndExecuteTransaction, issuerCapId, issuerRegistryId);
+      
+      if (!createResult.success || !createResult.objectId) {
+        return createResult;
+      }
+      
+      console.log('✅ FT Created:', createResult.objectId);
+      
+      // Step 2: List the created FT immediately with total supply information
+      console.log('📋 Auto-listing FT on marketplace...');
+      const totalSupply = data.amount; // The total supply from FT creation
+      const quantityToList = data.amount; // List all tokens by default
+      const listResult = await this.listAssetFT(createResult.objectId, marketplacePrice, signerAddress, signAndExecuteTransaction, issuerRegistryId, quantityToList, totalSupply);
+      
+      if (!listResult.success) {
+        console.warn('⚠️  FT created but listing failed:', listResult.error);
+        // Still return success since FT was created
+        return {
+          success: true,
+          objectId: createResult.objectId,
+          error: `FT created successfully, but auto-listing failed: ${listResult.error}`
+        };
+      }
+      
+      console.log('🎯 FT Created and Listed Successfully');
+      
+      return {
+        success: true,
+        objectId: createResult.objectId,
+      };
+      
+    } catch (error: any) {
+      console.error('❌ Error in Create+List FT:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create and list FT',
+      };
+    }
+  }
+
+  /**
    * List asset for sale in marketplace  
    */
   async listAsset(
@@ -234,8 +469,8 @@ export class OneChainService {
       // Set gas budget to match successful CLI calls
       tx.setGasBudget(100000000); // 100M MIST = 0.1 SUI
       
-      // Default issuer registry if not provided
-      const defaultRegistryId = issuerRegistryId || '0x63e4eabad8715cb099d6a24084af925a51a6fb0f34e45cdc2f504c18f677a34e';
+      // Default issuer registry if not provided - UPDATED with new contract object
+      const defaultRegistryId = issuerRegistryId || '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7';
       
       // Call the list_asset_nft function with exact CLI structure
       tx.moveCall({
@@ -277,11 +512,88 @@ export class OneChainService {
   }
 
   /**
-   * Buy asset from marketplace (legacy function - use purchaseAsset instead)
+   * List FT asset for sale in marketplace  
+   */
+  async listAssetFT(
+    tokenId: string,
+    price: number,
+    sellerAddress: string,
+    signAndExecuteTransaction: any,
+    issuerRegistryId?: string,
+    quantityToList?: number, // How many units to list for sale
+    totalSupply?: number // Total supply of the FT
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const tx = new Transaction();
+      
+      // Set gas budget to match successful CLI calls
+      tx.setGasBudget(100000000); // 100M MIST = 0.1 SUI
+      
+      // Default issuer registry if not provided - use the correct NEW registry object
+      const defaultRegistryId = issuerRegistryId || '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7';
+      
+      // Default values if not provided
+      const defaultQuantityToList = quantityToList || 1000; // List all tokens by default
+      const defaultTotalSupply = totalSupply || 1000; // Assume same as quantity if not provided
+      
+      console.log('🏪 Listing FT Asset:', {
+        tokenId,
+        price,
+        quantityToList: defaultQuantityToList,
+        totalSupply: defaultTotalSupply,
+        marketplace: ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT,
+        registry: defaultRegistryId
+      });
+      
+      // Call the list_asset_ft function with ALL required parameters
+      tx.moveCall({
+        target: `${ONECHAIN_CONTRACTS.MARKETPLACE}::marketplace::list_asset_ft`,
+        arguments: [
+          tx.object(ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT), // marketplace
+          tx.object(defaultRegistryId), // issuer registry
+          tx.object(tokenId), // the FT asset object
+          tx.pure.u64(price), // price per unit
+          tx.pure.u64(defaultQuantityToList), // quantity to list
+          tx.pure.u64(defaultTotalSupply), // total supply
+          tx.object('0x6'), // clock object
+        ],
+      });
+
+      return new Promise((resolve) => {
+        signAndExecuteTransaction(
+          { transaction: tx },
+          {
+            onSuccess: (result: any) => {
+              console.log('✅ FT Listed successfully!', result);
+              resolve({
+                success: true,
+              });
+            },
+            onError: (error: any) => {
+              console.error('Error listing FT asset:', error);
+              resolve({
+                success: false,
+                error: error.message || 'Failed to list FT asset',
+              });
+            },
+          }
+        );
+      });
+    } catch (error: any) {
+      console.error('Error listing FT asset:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to list FT asset',
+      };
+    }
+  }
+
+  /**
+   * Buy asset from marketplace - Updated to match marketplace contract
    */
 async buyAsset(
     assetId: string,
-    price: number, // Total price in MIST
+    price: number, // Total price in MIST (kept for compatibility)
     signerAddress: string,
     signAndExecuteTransaction: any
   ): Promise<{ success: boolean; error?: string }> {
@@ -289,41 +601,182 @@ async buyAsset(
       const tx = new Transaction();
       tx.setGasBudget(100000000);
 
+      // Find user's OCT coins for payment
       const ownedOctCoins = await this.suiClient.getCoins({
         owner: signerAddress,
         coinType: ONECHAIN_CONTRACTS.OCT_COIN_TYPE,
       });
 
       if (!ownedOctCoins.data || ownedOctCoins.data.length === 0) {
-        return { success: false, error: 'No OCT coins found for payment.' };
+        return { success: false, error: 'No OCT coins found for payment. Please ensure you have OCT tokens.' };
       }
 
-      const mainOctCoin = ownedOctCoins.data[0];
-      const [paymentCoin] = tx.splitCoins(tx.object(mainOctCoin.coinObjectId), [tx.pure.u64(price)]);
+      // Use the first available OCT coin - the marketplace contract handles the payment logic
+      const paymentCoin = ownedOctCoins.data[0];
+      console.log(`💰 Using payment coin: ${paymentCoin.coinObjectId} with balance: ${paymentCoin.balance}`);
 
+      // Call buy_asset function with the ORIGINAL asset ID (the contract expects this as the listings table key):
+      // The contract logic:
+      // 1. Looks up listing using asset_id in listings table
+      // 2. Finds actual asset in escrow using the same asset_id as key
+      // 3. Transfers the escrow asset to buyer
+      console.log(`🛒 Attempting to buy asset: ${assetId}`);
       tx.moveCall({
         target: `${ONECHAIN_CONTRACTS.MARKETPLACE}::marketplace::buy_asset`,
         arguments: [
-          tx.object(ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT),
-          tx.pure.id(assetId),
-          paymentCoin,
+          tx.object(ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT), // marketplace object
+          tx.pure.id(assetId), // CORRECT: original asset ID (key for both listings and escrow tables)
+          tx.object(paymentCoin.coinObjectId), // payment coin object
         ],
-        typeArguments: [ONECHAIN_CONTRACTS.OCT_COIN_TYPE],
       });
 
       return new Promise((resolve) => {
         signAndExecuteTransaction(
           { transaction: tx },
           {
-            onSuccess: (result: any) => resolve({ success: true }),
-            onError: (error: any) => resolve({ success: false, error: error.message || 'Transaction failed' }),
+            onSuccess: (result: any) => {
+              console.log('✅ Asset purchased successfully!');
+              console.log('📦 Transaction result:', result);
+              resolve({ success: true });
+            },
+            onError: (error: any) => {
+              console.error('❌ Purchase failed:', error);
+              // Parse Move abort errors for better user experience
+              let errorMessage = 'Failed to purchase asset';
+              if (error.message && error.message.includes('MoveAbort')) {
+                if (error.message.includes(', 6)')) {
+                  errorMessage = 'This asset is no longer available for purchase.';
+                } else if (error.message.includes(', 5)')) {
+                  errorMessage = 'Insufficient payment amount.';
+                } else if (error.message.includes(', 4)')) {
+                  errorMessage = 'Marketplace is currently paused.';
+                }
+              }
+              resolve({ 
+                success: false, 
+                error: errorMessage
+              });
+            },
           }
         );
       });
     } catch (error: any) {
-      return { success: false, error: error.message || 'Failed to construct transaction' };
+      console.error('❌ Error in buyAsset:', error);
+      return { success: false, error: error.message || 'Failed to construct purchase transaction' };
     }
   }
+
+  /**
+   * Buy specific quantity of FT tokens from marketplace
+   */
+  async buyAssetFT(
+    assetId: string,
+    quantity: number,
+    pricePerUnit: number,
+    signerAddress: string,
+    signAndExecuteTransaction: any
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const tx = new Transaction();
+      tx.setGasBudget(100000000);
+
+      // Find user's OCT coins for payment
+      const ownedOctCoins = await this.suiClient.getCoins({
+        owner: signerAddress,
+        coinType: ONECHAIN_CONTRACTS.OCT_COIN_TYPE,
+      });
+
+      if (!ownedOctCoins.data || ownedOctCoins.data.length === 0) {
+        return { success: false, error: 'No OCT coins found for payment. Please ensure you have OCT tokens.' };
+      }
+
+      // Use the first available OCT coin
+      const paymentCoin = ownedOctCoins.data[0];
+      console.log(`💰 Using payment coin: ${paymentCoin.coinObjectId} with balance: ${paymentCoin.balance}`);
+      console.log(`🛒 Attempting to buy ${quantity} FT tokens of asset: ${assetId}`);
+
+      // Calculate expected cost for debugging
+      const totalCost = pricePerUnit * quantity;
+      console.log(`💵 Price per unit: ${pricePerUnit} MIST (${pricePerUnit / 1000000000} OCT)`);
+      console.log(`💵 Total cost: ${totalCost} MIST (${totalCost / 1000000000} OCT)`);
+      console.log(`💰 Payment coin balance: ${paymentCoin.balance} MIST (${parseInt(paymentCoin.balance) / 1000000000} OCT)`);
+      console.log(`✅ Sufficient balance: ${parseInt(paymentCoin.balance) >= totalCost}`);
+      
+      // Log all transaction arguments for debugging
+      console.log(`🔍 Transaction arguments:`);
+      console.log(`  - Marketplace: ${ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT}`);
+      console.log(`  - Asset ID: ${assetId}`);
+      console.log(`  - Quantity: ${quantity}`);
+      console.log(`  - Payment coin: ${paymentCoin.coinObjectId}`);
+
+      tx.moveCall({
+        target: `${ONECHAIN_CONTRACTS.MARKETPLACE}::marketplace::buy_asset_ft`,
+        arguments: [
+          tx.object(ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT), // marketplace object
+          tx.pure.id(assetId), // asset ID
+          tx.pure.u64(quantity), // quantity to buy
+          tx.object(paymentCoin.coinObjectId), // payment coin object
+        ],
+        typeArguments: [], // No type arguments needed since OCT is hardcoded in the function
+      });
+
+      return new Promise((resolve) => {
+        signAndExecuteTransaction(
+          { transaction: tx },
+          {
+            onSuccess: (result: any) => {
+              console.log('✅ FT tokens purchased successfully!');
+              console.log('📦 Transaction result:', result);
+              resolve({ success: true });
+            },
+            onError: (error: any) => {
+              console.error('❌ FT purchase failed:', error);
+              console.error('❌ Full error details:', JSON.stringify(error, null, 2));
+              
+              let errorMessage = 'Failed to purchase FT tokens';
+              
+              // Try to extract more specific error information
+              if (error.cause) {
+                console.error('❌ Error cause:', JSON.stringify(error.cause, null, 2));
+              }
+              
+              if (error.message) {
+                console.error('❌ Error message:', error.message);
+                if (error.message.includes('MoveAbort')) {
+                  if (error.message.includes(', 6)')) {
+                    errorMessage = 'This asset is no longer available for purchase.';
+                  } else if (error.message.includes(', 8)')) {
+                    errorMessage = 'Insufficient quantity available.';
+                  } else if (error.message.includes(', 5)')) {
+                    errorMessage = 'Insufficient payment amount.';
+                  } else if (error.message.includes(', 10)')) {
+                    errorMessage = 'Quantity must be greater than zero.';
+                  } else if (error.message.includes(', 4)')) {
+                    errorMessage = 'Marketplace is currently paused.';
+                  } else if (error.message.includes(', 6)')) {
+                    errorMessage = 'Listing not found.';
+                  } else {
+                    errorMessage = `Transaction failed: ${error.message}`;
+                  }
+                } else {
+                  errorMessage = error.message;
+                }
+              }
+              
+              resolve({ 
+                success: false, 
+                error: errorMessage
+              });
+            },
+          }
+        );
+      });
+    } catch (error: any) {
+      console.error('❌ Error in buyAssetFT:', error);
+      return { success: false, error: error.message || 'Failed to construct FT purchase transaction' };
+    }
+  }
+
   /**
    * Get user's assets
    */
@@ -344,6 +797,86 @@ async buyAsset(
       return ownedObjects.data || [];
     } catch (error) {
       console.error('Error fetching user assets:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user's FT balances from marketplace
+   */
+  async getUserFTBalances(userAddress: string): Promise<any[]> {
+    try {
+      console.log('🔄 Fetching FT balances for user:', userAddress);
+      
+      // First, get all FT assets from marketplace listings to check user's balances
+      const marketplaceListings = await this.getMarketplaceListings();
+      const ftListings = marketplaceListings.filter(listing => !listing.isNft);
+      
+      console.log('📊 Found FT listings in marketplace:', ftListings.length);
+      
+      const ftBalances = [];
+
+      for (const listing of ftListings) {
+        try {
+          console.log(`🔍 Checking balance for FT asset: ${listing.tokenId}`);
+          
+          // Try to get user's balance for this FT asset using dev inspect
+          const result = await this.suiClient.devInspectTransactionBlock({
+            sender: userAddress,
+            transactionBlock: (() => {
+              const tx = new Transaction();
+              tx.moveCall({
+                target: `${ONECHAIN_CONTRACTS.MARKETPLACE}::marketplace::get_ft_balance`,
+                arguments: [
+                  tx.object(ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT),
+                  tx.pure.id(listing.tokenId),
+                  tx.pure.address(userAddress),
+                ],
+              });
+              return tx;
+            })(),
+          });
+
+          console.log(`📦 Balance result for ${listing.tokenId}:`, result);
+
+          if (result.results && result.results[0] && result.results[0].returnValues) {
+            const returnValue = result.results[0].returnValues[0];
+            if (returnValue && returnValue.length > 0) {
+              // Parse the balance from bytes
+              let balance = 0;
+              if (typeof returnValue[0] === 'number') {
+                balance = returnValue[0];
+              } else if (Array.isArray(returnValue[0])) {
+                // Handle byte array format
+                const bytes = returnValue[0] as number[];
+                balance = bytes[0] || 0;
+              }
+              
+              console.log(`💰 User has ${balance} tokens of ${listing.name}`);
+              
+              if (balance > 0) {
+                ftBalances.push({
+                  ...listing,
+                  user_balance: balance,
+                  type: 'FT',
+                  // Add additional metadata for dashboard display
+                  metadata_uri: listing.metadataURI,
+                  asset_id: listing.tokenId,
+                  price_per_unit: listing.pricePerToken
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.warn(`⚠️ Could not get balance for asset ${listing.tokenId}:`, error);
+          // Continue to next asset if this one fails
+        }
+      }
+
+      console.log('✅ Final FT balances found:', ftBalances.length);
+      return ftBalances;
+    } catch (error) {
+      console.error('❌ Error fetching user FT balances:', error);
       return [];
     }
   }
@@ -641,86 +1174,286 @@ async buyAsset(
   }
 
   /**
+   * Get metadata URI from escrow tables (fallback method from old marketplace)
+   */
+  private async getMetadataFromEscrow(assetId: string): Promise<string | null> {
+    try {
+      // 1. Fetch the Marketplace object
+      const marketplace = await this.suiClient.getObject({
+        id: ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT,
+        options: { showContent: true }
+      });
+
+      // 2. Get the nft_escrow and ft_escrow table IDs
+      const fields = (marketplace.data?.content as any)?.fields;
+      const nftEscrowTableId = fields?.nft_escrow?.fields?.id?.id;
+      const ftEscrowTableId = fields?.ft_escrow?.fields?.id?.id;
+
+      if (!nftEscrowTableId && !ftEscrowTableId) {
+        console.log('No escrow tables found in marketplace');
+        return null;
+      }
+
+      // 3. Try NFT escrow first
+      if (nftEscrowTableId) {
+        try {
+          const nftInEscrow = await this.suiClient.getDynamicFieldObject({
+            parentId: nftEscrowTableId,
+            name: { 
+              type: '0x2::object::ID', 
+              value: assetId 
+            }
+          });
+
+          const metadata_uri = (nftInEscrow.data?.content as any)?.fields?.value?.fields?.metadata_uri;
+          if (metadata_uri) {
+            console.log(`Found NFT metadata_uri from escrow:`, metadata_uri);
+            return metadata_uri;
+          }
+        } catch (e) {
+          // NFT not found in escrow, try FT escrow
+        }
+      }
+
+      // 4. Try FT escrow
+      if (ftEscrowTableId) {
+        try {
+          const ftInEscrow = await this.suiClient.getDynamicFieldObject({
+            parentId: ftEscrowTableId,
+            name: { 
+              type: '0x2::object::ID', 
+              value: assetId 
+            }
+          });
+
+          const metadata_uri = (ftInEscrow.data?.content as any)?.fields?.value?.fields?.metadata_uri;
+          if (metadata_uri) {
+            console.log(`Found FT metadata_uri from escrow:`, metadata_uri);
+            return metadata_uri;
+          }
+        } catch (e) {
+          // FT not found in escrow either
+        }
+      }
+
+      console.log(`No metadata found in escrow for asset ${assetId}`);
+      return null;
+
+    } catch (error) {
+      console.error(`Error fetching metadata from escrow for ${assetId}:`, error);
+      return null;
+    }
+  }
+
+  /**
    * Get marketplace listings
    */
    async getMarketplaceListings(): Promise<any[]> {
     try {
-      console.log('Fetching REAL marketplace listings with corrected logic...');
+      console.log('🔄 Fetching marketplace listings...');
       
+      // 1. Fetch marketplace object
       const marketplaceObject = await this.suiClient.getObject({
         id: ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT,
         options: { showContent: true },
       });
 
+      // 2. Extract listings table ID
       const fields = (marketplaceObject.data?.content as any)?.fields;
       if (!fields?.listings?.fields?.id?.id) {
-        console.log('No listings table found in the marketplace object.');
-        return []; // Return empty if no table
+        console.log('⚠️ No listings table found');
+        return [];
       }
+      
       const listingsTableId = fields.listings.fields.id.id;
-      console.log('Listings Table ID:', listingsTableId);
 
+      // 3. Fetch dynamic fields (all listings)
       const dynamicFields = await this.suiClient.getDynamicFields({ parentId: listingsTableId });
       if (!dynamicFields.data || dynamicFields.data.length === 0) {
-        console.log('The listings table is currently empty.');
-        return []; // Return empty if no listings
+        console.log('📋 No listings found');
+        return [];
       }
-      console.log(`Found ${dynamicFields.data.length} raw listing(s).`);
 
-      const listingsPromises = dynamicFields.data.map(async (field) => {
+      console.log(`📊 Found ${dynamicFields.data.length} listings to process`);
+
+      // 4. Process each listing
+      const listingsPromises = dynamicFields.data.map(async (field, index) => {
         try {
           const listingObj = await this.suiClient.getObject({ id: field.objectId, options: { showContent: true } });
           
-          // CORRECTED PATH: The actual listing data is inside fields.value.fields
           const listingFields = (listingObj.data?.content as any)?.fields?.value?.fields;
           
           if (!listingFields || !listingFields.asset_id) {
-            console.warn('Skipping a listing object because it has no asset_id field.', listingObj);
             return null;
           }
 
           const assetId = listingFields.asset_id;
-          const assetObj = await this.suiClient.getObject({ id: assetId, options: { showContent: true } });
-          const assetFields = (assetObj.data?.content as any)?.fields;
           
-          if (!assetFields) return null;
+          // Since the asset is listed, it's in escrow - try to get it from there
+          let assetFields = null;
+          let metadataURI = '';
+          
+          // First try to get the asset from the original location (might still be there for some assets)
+          try {
+            const assetObj = await this.suiClient.getObject({ id: assetId, options: { showContent: true } });
+            assetFields = (assetObj.data?.content as any)?.fields;
+            if (assetFields) {
+              metadataURI = assetFields.metadata_uri;
+              console.log(`✅ Found asset at original location: ${assetId}`);
+            }
+          } catch (e) {
+            console.log(`📦 Asset ${assetId} not at original location, checking escrow...`);
+          }
+          
+          // If not found at original location, get it from escrow
+          if (!assetFields) {
+            console.log(`🔍 Asset ${assetId} is in escrow, fetching from marketplace escrow tables...`);
+            
+            // Get marketplace object to access escrow tables
+            const marketplaceObj = await this.suiClient.getObject({
+              id: ONECHAIN_CONTRACTS.MARKETPLACE_OBJECT,
+              options: { showContent: true },
+            });
+            
+            const marketplaceFields = (marketplaceObj.data?.content as any)?.fields;
+            const ftEscrowTableId = marketplaceFields?.ft_escrow?.fields?.id?.id;
+            const nftEscrowTableId = marketplaceFields?.nft_escrow?.fields?.id?.id;
+            
+            // Try FT escrow first (since we know it's an FT from our CLI check)
+            if (ftEscrowTableId) {
+              try {
+                const ftInEscrow = await this.suiClient.getDynamicFieldObject({
+                  parentId: ftEscrowTableId,
+                  name: { 
+                    type: '0x2::object::ID', 
+                    value: assetId 
+                  }
+                });
+                
+                assetFields = (ftInEscrow.data?.content as any)?.fields?.value?.fields;
+                if (assetFields) {
+                  metadataURI = assetFields.metadata_uri;
+                  console.log(`✅ Found asset in FT escrow: ${assetId}`);
+                  console.log(`🔗 Metadata URI from FT escrow: ${metadataURI}`);
+                }
+              } catch (e) {
+                console.log(`📦 Asset ${assetId} not in FT escrow, trying NFT escrow...`);
+              }
+            }
+            
+            // Try NFT escrow if not found in FT escrow
+            if (!assetFields && nftEscrowTableId) {
+              try {
+                const nftInEscrow = await this.suiClient.getDynamicFieldObject({
+                  parentId: nftEscrowTableId,
+                  name: { 
+                    type: '0x2::object::ID', 
+                    value: assetId 
+                  }
+                });
+                
+                assetFields = (nftInEscrow.data?.content as any)?.fields?.value?.fields;
+                if (assetFields) {
+                  metadataURI = assetFields.metadata_uri;
+                  console.log(`✅ Found asset in NFT escrow: ${assetId}`);
+                  console.log(`🔗 Metadata URI from NFT escrow: ${metadataURI}`);
+                }
+              } catch (e) {
+                console.log(`❌ Asset ${assetId} not found in NFT escrow either`);
+              }
+            }
+          }
+          
+          if (!assetFields) {
+            console.warn(`⚠️ Skipping listing: asset ${assetId} not found in original location or escrow`);
+            return null;
+          }
 
-          const metadataURI = assetFields.metadata_uri || '';
+          // Ensure metadataURI is set from the assetFields we found
+          if (!metadataURI && assetFields.metadata_uri) {
+            metadataURI = assetFields.metadata_uri;
+          }
+          console.log(`🔗 Final metadata URI for ${assetId}: ${metadataURI || 'Not found'}`);
+
+          // Fetch metadata from IPFS if available
           let metadata: any = {};
           if (metadataURI && metadataURI.startsWith('ipfs://')) {
+            console.log(`📥 Fetching metadata from IPFS for ${assetId}...`);
             const hash = metadataURI.replace('ipfs://', '');
-            const response = await fetch(`https://gateway.pinata.cloud/ipfs/${hash}`);
-            if (response.ok) {
-              metadata = await response.json();
+            try {
+              const response = await fetch(`https://gateway.pinata.cloud/ipfs/${hash}`);
+              if (response.ok) {
+                metadata = await response.json();
+                console.log(`✅ Successfully fetched metadata for ${assetId}:`, metadata);
+              } else {
+                console.warn(`⚠️ Failed to fetch metadata: HTTP ${response.status}`);
+              }
+            } catch (metadataError) {
+              console.error(`❌ Error fetching metadata from IPFS:`, metadataError);
             }
           }
 
+          // Get total supply and available tokens info from the correct fields
+          const totalSupply = assetFields.total_supply || listingFields.total_supply || 1;
+          const availableTokens = listingFields.available_quantity || totalSupply; 
+          const pricePerToken = listingFields.price_per_unit?.toString() || '0'; // Fixed: use price_per_unit from contract
+          
+          console.log(`💰 Price extraction for ${assetId}:`, {
+            listingFields,
+            price_per_unit: listingFields.price_per_unit,
+            pricePerToken,
+            totalSupply,
+            availableTokens
+          });
+          
           // Transform the data for the frontend
-          return {
+          const transformedData = {
             tokenId: assetId,
             name: metadata.name || 'Unnamed Asset',
             description: metadata.description || 'No description.',
             image: metadata.image ? `https://gateway.pinata.cloud/ipfs/${metadata.image.replace('ipfs://', '')}` : '/placeholder.svg',
-            price: listingFields.price?.toString() || '0',
-            amount: assetFields.total_supply || 1,
+            price: pricePerToken,
+            pricePerToken: pricePerToken, // Individual token price
+            totalSupply: totalSupply, // Total tokens minted
+            amount: availableTokens, // Available tokens for purchase
+            availableTokens: availableTokens, // Alias for clarity
             seller: listingFields.seller || '',
             metadataURI: metadataURI,
             isNft: !assetFields.total_supply,
             attributes: metadata.attributes || [],
+            // Additional metadata for display
+            assetType: metadata.assetType || 'Unknown',
+            baseCurrency: metadata.baseCurrency || 'OCT',
+            pricePerTokenOCT: metadata.pricePerTokenOCT || 1,
+            tokenRewards: metadata.tokenRewards || 0,
           };
+          
+          console.log(`📦 Final transformed data for ${assetId}:`, transformedData);
+          return transformedData;
         } catch (e) {
-          console.error(`Error processing listing ${field.objectId}:`, e);
+          console.error(`❌ Error processing listing ${field.objectId}:`, e);
           return null;
         }
       });
 
+      // 5. Wait for all listings to be processed
       const listings = (await Promise.all(listingsPromises)).filter(item => item !== null);
-      console.log('✅ Successfully processed real on-chain listings:', listings);
+      console.log(`✅ Successfully processed ${listings.length}/${dynamicFields.data.length} marketplace listings`);
+      
+      if (listings.length > 0) {
+        console.log('📋 Sample listing data:', listings[0]);
+      }
+      
       return listings;
 
     } catch (error) {
-      console.error('❌ A critical error occurred while fetching marketplace listings:', error);
-      throw new Error("Failed to fetch listings from the blockchain.");
+      console.error('❌ Critical error occurred while fetching marketplace listings:', error);
+      console.error('Error details:', {
+        name: (error as Error).name,
+        message: (error as Error).message,
+        stack: (error as Error).stack
+      });
+      throw new Error(`Failed to fetch listings from the blockchain: ${(error as Error).message}`);
     }
   }
   
@@ -856,7 +1589,7 @@ async buyAsset(
     signerAddress: string,
     signAndExecuteTransaction: any,
     // It's good practice to pass the registry ID instead of hardcoding
-    issuerRegistryId: string = '0x6c858122a388ebfaf088b1ba78293b74d1d634b1ea40d6e97c47bed32d96f622'
+    issuerRegistryId: string = '0xd1b6c3b3d112475832613d8165a90a9d6fb548948e15f6f46f265624ed7986af'
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const tx = new Transaction();
@@ -1164,6 +1897,55 @@ async buyAsset(
         totalVolume: 0,
         marketplaceStatus: true,
       };
+    }
+  }
+
+  /**
+   * Get user's OCT wallet balance (simplified version for dashboard analytics)
+   */
+  async getUserOCTBalance(address: string): Promise<number> {
+    try {
+      console.log('💰 Getting OCT balance for dashboard:', address);
+      
+      // Try to get balance using the most reliable method
+      const octBalance = await this.suiClient.getBalance({
+        owner: address,
+        coinType: ONECHAIN_CONTRACTS.OCT_COIN_TYPE,
+      });
+      
+      if (octBalance && octBalance.totalBalance) {
+        const balanceInOCT = parseFloat(octBalance.totalBalance) / 1000000000; // Convert from MIST to OCT
+        console.log('✅ OCT balance found:', balanceInOCT, 'OCT');
+        return balanceInOCT;
+      }
+      
+      // If no balance found, try alternative coin types
+      for (const coinType of [
+        ONECHAIN_CONTRACTS.OCT_COIN_TYPE_ALT1,
+        ONECHAIN_CONTRACTS.OCT_COIN_TYPE_ALT2,
+        ONECHAIN_CONTRACTS.SUI_COIN_TYPE // Fallback to SUI if OCT not available
+      ]) {
+        try {
+          const balance = await this.suiClient.getBalance({
+            owner: address,
+            coinType: coinType,
+          });
+          
+          if (balance && balance.totalBalance) {
+            const balanceValue = parseFloat(balance.totalBalance) / 1000000000;
+            console.log(`✅ Balance found with ${coinType}:`, balanceValue);
+            return balanceValue;
+          }
+        } catch (error) {
+          console.log(`❌ Failed to get balance with ${coinType}`);
+        }
+      }
+      
+      console.log('⚠️ No OCT balance found, returning 0');
+      return 0;
+    } catch (error) {
+      console.error('Error getting OCT balance:', error);
+      return 0; // Return 0 if we can't fetch balance
     }
   }
 
