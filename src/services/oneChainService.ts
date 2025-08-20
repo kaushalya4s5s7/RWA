@@ -1381,7 +1381,7 @@ async buyAsset(
             console.log(`📥 Fetching metadata from IPFS for ${assetId}...`);
             const hash = metadataURI.replace('ipfs://', '');
             try {
-              const response = await fetch(`https://gateway.pinata.cloud/ipfs/${hash}`);
+              const response = await fetch(`${import.meta.env.VITE_PINATA_GATEWAY}${hash}`);
               if (response.ok) {
                 metadata = await response.json();
                 console.log(`✅ Successfully fetched metadata for ${assetId}:`, metadata);
@@ -1411,7 +1411,7 @@ async buyAsset(
             tokenId: assetId,
             name: metadata.name || 'Unnamed Asset',
             description: metadata.description || 'No description.',
-            image: metadata.image ? `https://gateway.pinata.cloud/ipfs/${metadata.image.replace('ipfs://', '')}` : '/placeholder.svg',
+            image: metadata.image ? `${import.meta.env.VITE_PINATA_GATEWAY}${metadata.image.replace('ipfs://', '')}` : '/placeholder.svg',
             price: pricePerToken,
             pricePerToken: pricePerToken, // Individual token price
             totalSupply: totalSupply, // Total tokens minted
@@ -1588,8 +1588,8 @@ async buyAsset(
     metadataURI: string,
     signerAddress: string,
     signAndExecuteTransaction: any,
-    // It's good practice to pass the registry ID instead of hardcoding
-    issuerRegistryId: string = '0xd1b6c3b3d112475832613d8165a90a9d6fb548948e15f6f46f265624ed7986af'
+    // Use the same registry ID as other functions
+    issuerRegistryId: string = '0x5cb11f0d91fca68482f8fce83902d00f9b364fdd40080784ad171ec3137e17a7'
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const tx = new Transaction();
@@ -1603,8 +1603,8 @@ async buyAsset(
         arguments: [
           tx.object(issuerRegistryId),    // 1. Pass the IssuerRegistry object
           tx.pure.address(issuerAddress), // 2. Pass the issuer's address
-          tx.pure.string(name),           // 3. Pass the issuer's name
-          tx.pure.string(metadataURI),    // 4. Pass the metadata URI
+          tx.pure(new Uint8Array(new TextEncoder().encode(name))), // 3. Pass name as vector<u8>
+          tx.pure(new Uint8Array(new TextEncoder().encode(metadataURI))), // 4. Pass metadata URI as vector<u8>
         ],
       });
 
