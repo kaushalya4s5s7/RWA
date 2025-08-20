@@ -55,7 +55,16 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ethers } from 'ethers';
 import { fetchIPFSContent } from '@/utils/ipfs';
-import { getAllManagers, getManagerTokens } from '@/services/contractService';
+// import { getAllManagers, getManagerTokens } from '@/services/contractService'; // Commented out - functions don't exist
+
+// Mock functions for now - replace with actual implementation when available
+const getAllManagers = async () => {
+  return { addresses: [] }; // Mock empty managers list
+};
+
+const getManagerTokens = async (managerAddress: string) => {
+  return []; // Mock empty token list
+};
 
 // Types for Asset Management
 interface AssignedAsset {

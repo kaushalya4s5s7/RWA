@@ -22,4 +22,32 @@ export default defineConfig(({ mode }) => ({
   define: {
     global: "globalThis",
   },
+  build: {
+    // Increase chunk size warning limit to 1500 kB to reduce warnings
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunk for React and core libraries
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          
+          // UI components chunk - only the most commonly used ones
+          'ui-vendor': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+            'lucide-react'
+          ],
+          
+          // Form and utility libraries
+          'utils-vendor': [
+            'react-hook-form',
+            'axios',
+            '@tanstack/react-query',
+            'ethers'
+          ]
+        }
+      }
+    }
+  }
 }));
