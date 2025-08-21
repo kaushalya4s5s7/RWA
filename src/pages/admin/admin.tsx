@@ -487,7 +487,7 @@ const Admin: React.FC = () => {
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <CardTitle className={`text-2xl ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                OneChain Admin Panel
+                Credora Panel
               </CardTitle>
               <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Connect your wallet to access administrative functions
@@ -517,7 +517,7 @@ const Admin: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Shield className={`w-8 h-8 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  OneChain Admin
+                  Credora admin
                 </h1>
               </div>
             </div>
