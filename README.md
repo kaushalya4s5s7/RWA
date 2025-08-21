@@ -170,6 +170,16 @@ Features:
 * **Fast Finality**: Sub-second confirmations.
 * **True Digital Ownership**: Assets are first-class citizens on the blockchain.
 ---
+### Credora Workflow
+
+
+
+---
+### Smart contract Workflow
+
+
+
+---
 📝 Contract Deployment
 Deploy Move Package
 
