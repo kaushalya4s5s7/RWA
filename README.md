@@ -172,7 +172,7 @@ Features:
 ---
 ### Credora Workflow
 
-
+![https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/workflow%20onechain.jpg](https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/workflow%20onechain.jpg)
 
 ---
 ### Smart contract Workflow
