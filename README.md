@@ -356,8 +356,8 @@ npm run test
 
 ## 🚀 Deployment
 
-* **Frontend**: Vercel
-* **Backend**: Railway/Heroku
+* **Frontend**: CloudFlare
+* **Backend**: onRender
 * **Contracts**: OneChain testnet
 
 ---
