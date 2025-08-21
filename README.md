@@ -368,12 +368,3 @@ MIT License
 
 **Built with ❤️ on OneChain**
 Tokenizing the world's assets, one object at a time.
-
-```
-
----
-
-✅ This is now fully formatted for **README.md**.
-
-Do you want me to **add GitHub badges, project logo, and quick links (Docs, Discord, Demo)** to make it more professional? Or should I keep it simple and clean like this?
-```
