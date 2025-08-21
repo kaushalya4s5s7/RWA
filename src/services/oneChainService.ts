@@ -1603,8 +1603,8 @@ async buyAsset(
         arguments: [
           tx.object(issuerRegistryId),    // 1. Pass the IssuerRegistry object
           tx.pure.address(issuerAddress), // 2. Pass the issuer's address
-          tx.pure(new Uint8Array(new TextEncoder().encode(name))), // 3. Pass name as vector<u8>
-          tx.pure(new Uint8Array(new TextEncoder().encode(metadataURI))), // 4. Pass metadata URI as vector<u8>
+          tx.pure.vector('u8', Array.from(new TextEncoder().encode(name))), // 3. Pass name as vector<u8>
+          tx.pure.vector('u8', Array.from(new TextEncoder().encode(metadataURI))), // 4. Pass metadata URI as vector<u8>
         ],
       });
 
