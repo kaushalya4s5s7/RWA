@@ -177,7 +177,7 @@ Features:
 ---
 ### Smart contract Workflow
 
-!(https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/contract%20flow.png)[https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/contract%20flow.png]
+![https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/contract%20flow.png](https://raw.githubusercontent.com/kaushalya4s5s7/Credora/refs/heads/main/public/contract%20flow.png)
 
 ---
 📝 Contract Deployment
