@@ -95,7 +95,7 @@ The RWA Tokenization Platform enables users to convert real-world assets into se
 ### Development Tools
 - **Vite**
 - **ESLint**
-- **Sui CLI**
+- **One CLI**
 - **Git**
 
 ---
