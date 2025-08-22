@@ -1,4 +1,4 @@
-# 🏠 RWA Tokenization Platform
+# Credora | 🏠 RWA Tokenization Platform
 
 **Real-World Asset Tokenization on OneChain Network**
 
