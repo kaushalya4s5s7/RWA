@@ -18,7 +18,9 @@ import {
   AlertCircle,
   Loader2,
   Wallet,
-  ChevronDown
+  ChevronDown,
+  Zap,
+  Link
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +33,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { authApi, type RegisterData, type LoginData } from '@/api/authApi';
 import { useSuiWallet, ConnectButton } from '@/context/SuiWalletContext';
 import { useAuth } from '@/context/AuthContext';
+
+// Utility function to convert Sui address to backend-compatible format
+const convertSuiAddressToBackendFormat = (suiAddress: string): string => {
+  // Sui addresses are 66 chars (0x + 64 hex), backend expects 42 chars (0x + 40 hex)
+  // Take the last 40 characters to maintain uniqueness
+  return '0x' + suiAddress.slice(-40);
+};
+
+// Utility function to validate Sui address format
+const isValidSuiAddress = (address: string): boolean => {
+  return typeof address === 'string' && 
+         address.startsWith('0x') && 
+         address.length === 66 && 
+         /^0x[a-fA-F0-9]{64}$/.test(address);
+};
+
+// OneChain Wallet Connect Component
+const OneChainConnectButton: React.FC<{ className?: string }> = ({ className }) => {
+  const { isConnected, address, wallets } = useSuiWallet();
+  
+  return (
+    <div className={className}>
+      {!isConnected ? (
+        <div className="space-y-3">
+          <div className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <Zap className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-medium text-blue-700">Connect to OneChain</span>
+          </div>
+          <ConnectButton className="w-full" />
+          <div className="text-xs text-gray-500 text-center">
+            Supported wallets: Sui Wallet, Suiet, Ethos
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-green-700">OneChain Wallet Connected</div>
+              <div className="text-xs text-green-600 truncate">{address}</div>
+            </div>
+            <Link className="h-4 w-4 text-green-600" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -76,22 +126,55 @@ const Login: React.FC = () => {
   // Verify wallet address and get available roles
   const verifyWalletAddress = async (walletAddress: string) => {
     try {
-      const response = await authApi.verifyWallet(walletAddress);
+      console.log('🔍 Verifying wallet address:', walletAddress);
+      
+      // Validate Sui wallet address format
+      if (!isValidSuiAddress(walletAddress)) {
+        console.error('❌ Invalid Sui wallet address format:', {
+          address: walletAddress,
+          length: walletAddress?.length,
+          isValid: isValidSuiAddress(walletAddress)
+        });
+        return;
+      }
+      
+      // Convert Sui address to backend-compatible format
+      const backendWalletAddress = convertSuiAddressToBackendFormat(walletAddress);
+      
+      console.log('🔄 Address conversion:', {
+        originalSui: walletAddress,
+        backendFormat: backendWalletAddress,
+        suiLength: walletAddress.length,
+        backendLength: backendWalletAddress.length
+      });
+      
+      console.log('✅ Sending converted address to backend...');
+      const response = await authApi.verifyWallet(backendWalletAddress);
+      
       if (response.success && response.data.walletExists) {
         setAvailableRoles(response.data.availableRoles);
-        // Set primary role as the first available role (or null if none)
         setUserPrimaryRole(response.data.availableRoles.length > 0 ? response.data.availableRoles[0] : null);
+        
         if (response.data.userInfo) {
           setFormData(prev => ({
             ...prev,
             firstName: response.data.userInfo?.firstName || '',
             lastName: response.data.userInfo?.lastName || '',
-            email: response.data.userInfo?.email || ''
+            email: response.data.userInfo?.email || '',
+            walletAddress: backendWalletAddress // Store backend-compatible format
           }));
         }
+      } else {
+        // Store the backend format even if no existing account
+        setFormData(prev => ({ ...prev, walletAddress: backendWalletAddress }));
       }
     } catch (error) {
       console.error('Wallet verification error:', error);
+      // Still store the converted address for registration
+      if (isValidSuiAddress(walletAddress)) {
+        const backendWalletAddress = convertSuiAddressToBackendFormat(walletAddress);
+        setFormData(prev => ({ ...prev, walletAddress: backendWalletAddress }));
+      }
     }
   };
 
@@ -354,48 +437,38 @@ const Login: React.FC = () => {
 
 
 
-              {/* Wallet Connection - Only show for registration or when needed */}
+              {/* OneChain Wallet Connection - Enhanced UI */}
               {(!isLogin || loginMethod === 'wallet') && (
                 <div className="mb-6">
-                  <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                    Connect Wallet {!isLogin ? '' : '(Alternative Login)'}
+                  <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-blue-600" />
+                    Connect OneChain Wallet {!isLogin ? '' : '(Alternative Login)'}
                   </Label>
-                  <div className="space-y-3">
-                    {!isConnected ? (
-                      <Button 
-                        onClick={connectWallet}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        <Wallet className="w-4 h-4 mr-2" />
-                        Connect Wallet
-                      </Button>
-                    ) : (
-                      <div className="w-full">
-                        <p className="text-sm text-green-600 mb-2">
-                          ✅ Wallet Connected: {address?.slice(0, 8)}...{address?.slice(-6)}
-                        </p>
-                        <ConnectButton />
+                  
+                  <OneChainConnectButton className="w-full" />
+                  
+                  {walletConnected && address && (
+                    <div className="mt-3 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center text-green-700 mb-2">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">OneChain Wallet Connected</span>
                       </div>
-                    )}
-                    {walletConnected && address && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center text-green-700">
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          <span className="text-sm">Wallet Connected: {address.slice(0, 6)}...{address.slice(-4)}</span>
+                      <div className="text-xs text-gray-600 font-mono mb-2">
+                        {address.slice(0, 8)}...{address.slice(-8)}
+                      </div>
+                      {userPrimaryRole && (
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                          {userPrimaryRole.charAt(0).toUpperCase() + userPrimaryRole.slice(1)} Account
+                        </Badge>
+                      )}
+                      {availableRoles.length === 0 && isLogin && (
+                        <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                          <AlertCircle className="w-3 h-3 inline mr-1" />
+                          No registered account found for this wallet
                         </div>
-                        {userPrimaryRole && (
-                          <div className="mt-2 text-sm text-green-600">
-                            Account type: {userPrimaryRole.charAt(0).toUpperCase() + userPrimaryRole.slice(1)}
-                          </div>
-                        )}
-                        {availableRoles.length === 0 && isLogin && (
-                          <div className="mt-2 text-sm text-orange-600">
-                            No registered account found for this wallet
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -636,17 +709,22 @@ const Login: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Wallet Login Option */}
+                      {/* OneChain Wallet Login Option */}
                       <div className="mt-4">
                         <Button 
                           type="button" 
                           variant="outline" 
-                          className="w-full h-11 border-gray-200"
+                          className="w-full h-11 border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
                           onClick={() => setLoginMethod('wallet')}
                         >
-                          <Wallet className="w-4 h-4 mr-2" />
-                          Connect Wallet to Login
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-blue-600 group-hover:text-blue-700" />
+                            <span className="text-blue-700 group-hover:text-blue-800">Connect OneChain Wallet</span>
+                          </div>
                         </Button>
+                        <div className="text-xs text-gray-500 text-center mt-2">
+                          Secure login with OneChain ecosystem wallets
+                        </div>
                       </div>
                     </div>
                   </>

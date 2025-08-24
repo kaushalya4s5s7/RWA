@@ -21,7 +21,7 @@ export const fetchoctPrice = async (): Promise<number> => {
     
     if (response.ok) {
       const data = await response.json();
-      const price = data['onechain-hashgraph']?.usd;
+      const price = data['onechain- ']?.usd;
       
       if (price) {
         cachedPrice = {

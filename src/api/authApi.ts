@@ -213,11 +213,21 @@ export const authApi = {
   // Verify wallet address
   verifyWallet: async (walletAddress: string): Promise<WalletVerificationResponse> => {
     try {
+      console.log('🔍 authApi.verifyWallet - Backend format address:', {
+        walletAddress,
+        length: walletAddress?.length,
+        isBackendFormat: /^0x[a-fA-F0-9]{40}$/.test(walletAddress)
+      });
+
+      const requestBody = { walletAddress };
+      
       const response = await fetch(`${API_BASE_URL}/verify-wallet`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ walletAddress }),
+        body: JSON.stringify(requestBody),
       });
+
+      console.log('📥 Response status:', response.status);
 
       return await handleResponse<WalletVerificationResponse>(response);
     } catch (error) {
