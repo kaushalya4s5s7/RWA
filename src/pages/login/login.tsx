@@ -230,87 +230,123 @@ const Login: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
+  e.preventDefault();
+  setError(null);
+  setSuccess(null);
 
-    // Validate form
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+  // Validate form
+  const validationError = validateForm();
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      if (isLogin) {
-        // Login
-        let loginData: LoginData;
+  try {
+    if (isLogin) {
+      // Login - Call API directly instead of using AuthContext
+      let loginData: LoginData;
 
-        if (loginMethod === 'wallet') {
-          loginData = {
-            walletAddress: formData.walletAddress
-            // Remove preferredRole since we'll use the user's primary role
-          };
-        } else {
-          loginData = {
-            email: formData.email,
-            password: formData.password
-            // Remove preferredRole since we'll use the user's primary role
-          };
-        }
-
-        // Use Auth Context login method
-        await login(loginData);
-        setSuccess('Login successful! Redirecting...');
-        // Auth Context will handle navigation automatically
-      } else {
-        // Register
-        const registerData: RegisterData = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-          walletAddress: formData.walletAddress,
-          role: selectedRole
+      if (loginMethod === 'wallet') {
+        loginData = {
+          walletAddress: formData.walletAddress
         };
-
-        const response = await authApi.register(registerData);
-        
-        if (response.success) {
-          setSuccess('Registration successful! Redirecting...');
-          // Navigate based on the registered role (should be 'user' for public registration)
-          const userRole = response.data.user?.primaryRole || response.data.user?.roles?.[0] || 'user';
-          let dashboardRoute = '/marketplace'; // default for users
-          
-          switch (userRole) {
-            case 'admin':
-              dashboardRoute = '/admin';
-              break;
-            case 'issuer':
-              dashboardRoute = '/issuer';
-              break;
-            case 'manager':
-              dashboardRoute = '/manager';
-              break;
-            default:
-              dashboardRoute = '/marketplace';
-          }
-          
-          setTimeout(() => {
-            navigate(dashboardRoute);
-          }, 1000);
-        }
+      } else {
+        loginData = {
+          email: formData.email,
+          password: formData.password
+        };
       }
-    } catch (error: any) {
-      console.error('Auth error:', error);
-      setError(error.message || 'An error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+
+      // Call the API directly
+      const response = await authApi.login(loginData);
+      
+      if (response.success) {
+        const { user: userData, token: userToken, currentRole: userCurrentRole, availableRoles } = response.data;
+        
+        // Store auth data in localStorage (same as AuthContext does)
+        localStorage.setItem('authToken', userToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('currentRole', userCurrentRole);
+        localStorage.setItem('availableRoles', JSON.stringify(availableRoles));
+        
+        setSuccess('Login successful! Redirecting...');
+        
+        // Handle navigation based on user's current role
+        let dashboardRoute = '/marketplace'; // default
+        
+        switch (userCurrentRole) {
+          case 'admin':
+            dashboardRoute = '/admin';
+            break;
+          case 'issuer':
+            dashboardRoute = '/issuer';
+            break;
+          case 'manager':
+            dashboardRoute = '/manager';
+            break;
+          case 'user':
+          default:
+            dashboardRoute = '/marketplace';
+            break;
+        }
+        
+        console.log('🚀 Navigating to:', dashboardRoute, 'based on role:', userCurrentRole);
+        
+        // Navigate after a brief delay to show success message
+        setTimeout(() => {
+          navigate(dashboardRoute, { replace: true });
+          // Optionally trigger a page reload to ensure AuthContext picks up the changes
+          window.location.reload();
+        }, 1000);
+      }
+    } else {
+      // Register - Keep existing logic
+      const registerData: RegisterData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        walletAddress: formData.walletAddress,
+        role: selectedRole
+      };
+
+      const response = await authApi.register(registerData);
+      
+      if (response.success) {
+        setSuccess('Registration successful! Redirecting...');
+        // Navigate based on the registered role
+        const userRole = response.data.user?.primaryRole || response.data.user?.roles?.[0] || 'user';
+        let dashboardRoute = '/marketplace'; // default for users
+        
+        switch (userRole) {
+          case 'admin':
+            dashboardRoute = '/admin';
+            break;
+          case 'issuer':
+            dashboardRoute = '/issuer';
+            break;
+          case 'manager':
+            dashboardRoute = '/manager';
+            break;
+          default:
+            dashboardRoute = '/marketplace';
+        }
+        
+        setTimeout(() => {
+          navigate(dashboardRoute);
+        }, 1000);
+      }
     }
-  };
+  } catch (error: any) {
+    console.error('Auth error:', error);
+    setError(error.message || 'An error occurred. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const features = [
     {
