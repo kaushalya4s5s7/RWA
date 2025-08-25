@@ -458,7 +458,7 @@ const Marketplace: React.FC = () => {
         
         <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">See All Listings</h2>
-            <p className="text-gray-600">Explore our complete collection of tokenized assets on Sui</p>
+            <p className="text-gray-600">Explore our complete collection of tokenized assets on Onechain</p>
         </div>
 
         <Tabs defaultValue="realEstate" className="w-full mt-8">
