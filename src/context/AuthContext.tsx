@@ -51,7 +51,7 @@ interface AuthContextType {
   // Authentication methods
   login: (credentials: any) => Promise<void>;
   logout: () => void;
-  switchRole: (role: string) => Promise<void>;
+  switchRole: (role: string, shouldRedirect?: boolean) => Promise<void>;
   
   // Authorization helpers
   hasRole: (role: string) => boolean;
@@ -119,8 +119,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               userId: parsedUser._id,
               roles: roles,
               currentRole: currentRoleFromToken,
-              primaryRole: primaryRoleFromToken
+              primaryRole: primaryRoleFromToken,
+              currentPath: location.pathname
             });
+
+            // 🔧 FIX: Check if user has permission for current route
+            const currentPath = location.pathname;
+            if (!canAccessRoute(currentPath, roles)) {
+              console.log('⚠️ User cannot access current route, redirecting...');
+              const defaultRoute = getDefaultDashboard(roles);
+              navigate(defaultRoute, { replace: true });
+            }
           } else {
             console.log('❌ Invalid token, clearing auth data');
             clearAuthData();
@@ -145,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, []); // 🔧 FIX: Remove location from dependencies to prevent re-initialization on route changes
 
   const clearAuthData = () => {
     localStorage.removeItem('authToken');
@@ -159,6 +168,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setCurrentRole(null);
     setPrimaryRole(null);
     setIsAuthenticated(false);
+  };
+
+  // 🔧 FIX: Helper function to check route access
+  const canAccessRoute = (path: string, roles: string[]): boolean => {
+    // Define route permissions
+    const routePermissions: { [key: string]: string[] } = {
+      '/admin': ['admin'],
+      '/issuer': ['issuer', 'admin'],
+      '/manager': ['manager', 'admin'],
+      '/marketplace': ['user', 'manager', 'issuer', 'admin'],
+      '/': ['user', 'manager', 'issuer', 'admin'] // Allow all authenticated users
+    };
+
+    // Check if path starts with any protected route
+    for (const [route, allowedRoles] of Object.entries(routePermissions)) {
+      if (path.startsWith(route)) {
+        return allowedRoles.some(role => roles.includes(role));
+      }
+    }
+
+    // Default: allow access if no specific rule found
+    return true;
   };
 
   const login = async (credentials: any) => {
@@ -209,7 +240,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     navigate('/login', { replace: true });
   };
 
-  const switchRole = async (role: string) => {
+  // 🔧 FIX: Add shouldRedirect parameter with default false
+  const switchRole = async (role: string, shouldRedirect: boolean = false) => {
     try {
       if (!userRoles.includes(role)) {
         throw new Error(`You do not have ${role} role`);
@@ -229,9 +261,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         console.log('🔄 Role switched to:', role);
         
-        // Navigate to appropriate dashboard for the new role
-        const dashboardRoute = getDefaultDashboard([role]);
-        navigate(dashboardRoute, { replace: true });
+        // 🔧 FIX: Only redirect if explicitly requested
+        if (shouldRedirect) {
+          const dashboardRoute = getDefaultDashboard([role]);
+          navigate(dashboardRoute, { replace: true });
+        } else {
+          // 🔧 FIX: Check if current route is still accessible with new role
+          const currentPath = location.pathname;
+          if (!canAccessRoute(currentPath, [role])) {
+            console.log('⚠️ Current route not accessible with new role, redirecting...');
+            const dashboardRoute = getDefaultDashboard([role]);
+            navigate(dashboardRoute, { replace: true });
+          }
+        }
       }
     } catch (error) {
       console.error('❌ Role switch failed:', error);
