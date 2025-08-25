@@ -600,7 +600,7 @@ const Issuer: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Token Standard:</span>
-                    <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-medium`}>HTS NFT</span>
+                    <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-medium`}>NFT</span>
                   </div>
                   <div className="flex justify-between">
                     <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Auto-Listing:</span>
